@@ -53,6 +53,7 @@ if(ENABLE_TESTS)
     enable_testing()
     add_executable(MemoryDelayEngineTests
         tests/MemoryDelayEngineTests.cpp
+        src/MemoryDelayEngine.cpp
     )
     target_include_directories(MemoryDelayEngineTests PRIVATE src)
     target_link_libraries(MemoryDelayEngineTests PRIVATE
