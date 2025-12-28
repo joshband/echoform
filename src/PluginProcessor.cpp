@@ -109,7 +109,9 @@ void StereoMemoryDelayAudioProcessor::processBlock(juce::AudioBuffer<float>& buf
         engine.setRandomSeed(seed, transportPositionSamples.load());
     }
 
-    engine.processBlock(buffer);
+    const float* const* input = buffer.getArrayOfReadPointers();
+    float* const* output = buffer.getArrayOfWritePointers();
+    engine.processBlock(input, output, buffer.getNumSamples());
 }
 
 bool StereoMemoryDelayAudioProcessor::hasEditor() const
