@@ -1,0 +1,13 @@
+# Build output
+build/
+*.vst3/
+*.so
+*.dll
+*.dylib
+
+# VS Code settings
+.vscode/
+
+# JUCE generated files
+.idea/
+.DS_Store

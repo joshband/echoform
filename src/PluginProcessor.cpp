@@ -1,203 +1,179 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <memory>
+#include <vector>
+#include "MemoryDelayEngine.h"
 
-namespace
-{
-constexpr auto sizeId = "size";
-constexpr auto repeatsId = "repeats";
-constexpr auto scanId = "scan";
-constexpr auto scanModeId = "scanMode";
-constexpr auto spreadId = "spread";
-constexpr auto routingId = "routing";
-constexpr auto collectId = "collect";
-constexpr auto alwaysId = "always";
-constexpr auto wipeId = "wipe";
-constexpr auto inspectId = "inspect";
-}
-
-void MemoryDelayEngine::prepare(double sampleRate, int maximumBlockSize)
-{
-    sampleRateHz = sampleRate;
-    maxBlockSize = maximumBlockSize;
-}
-
-void MemoryDelayEngine::setParameters(const Parameters& parameters)
-{
-    currentParameters = parameters;
-}
-
-void MemoryDelayEngine::processBlock(juce::AudioBuffer<float>& buffer)
-{
-    juce::ignoreUnused(buffer, sampleRateHz, maxBlockSize, currentParameters);
-}
-
-MemoryDelayAudioProcessor::MemoryDelayAudioProcessor()
-    : juce::AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::stereo(), true)
-                                               .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts(*this, nullptr, "Parameters", createParameterLayout())
-{
-    sizeParam = apvts.getRawParameterValue(sizeId);
-    repeatsParam = apvts.getRawParameterValue(repeatsId);
-    scanParam = apvts.getRawParameterValue(scanId);
-    scanModeParam = apvts.getRawParameterValue(scanModeId);
-    spreadParam = apvts.getRawParameterValue(spreadId);
-    routingParam = apvts.getRawParameterValue(routingId);
-    collectParam = apvts.getRawParameterValue(collectId);
-    alwaysParam = apvts.getRawParameterValue(alwaysId);
-    wipeParam = apvts.getRawParameterValue(wipeId);
-    inspectParam = apvts.getRawParameterValue(inspectId);
-}
-
-MemoryDelayAudioProcessor::~MemoryDelayAudioProcessor() = default;
-
-const juce::String MemoryDelayAudioProcessor::getName() const
-{
-    return JucePlugin_Name;
-}
-
-bool MemoryDelayAudioProcessor::acceptsMidi() const
-{
-    return false;
-}
-
-bool MemoryDelayAudioProcessor::producesMidi() const
-{
-    return false;
-}
-
-bool MemoryDelayAudioProcessor::isMidiEffect() const
-{
-    return false;
-}
-
-double MemoryDelayAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int MemoryDelayAudioProcessor::getNumPrograms()
-{
-    return 1;
-}
-
-int MemoryDelayAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void MemoryDelayAudioProcessor::setCurrentProgram(int index)
-{
-    juce::ignoreUnused(index);
-}
-
-const juce::String MemoryDelayAudioProcessor::getProgramName(int index)
-{
-    juce::ignoreUnused(index);
-    return {};
-}
-
-void MemoryDelayAudioProcessor::changeProgramName(int index, const juce::String& newName)
-{
-    juce::ignoreUnused(index, newName);
-}
-
-void MemoryDelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
-{
-    engine.prepare(sampleRate, samplesPerBlock);
-}
-
-void MemoryDelayAudioProcessor::releaseResources()
-{
-}
-
-bool MemoryDelayAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
-{
-    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
-
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
-
-    return true;
-}
-
-void MemoryDelayAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-    juce::ignoreUnused(midiMessages);
-
-    MemoryDelayEngine::Parameters parameters;
-    parameters.size = sizeParam->load();
-    parameters.repeats = repeatsParam->load();
-    parameters.scan = scanParam->load();
-    parameters.scanMode = scanModeParam->load();
-    parameters.spread = spreadParam->load();
-    parameters.routing = routingParam->load();
-    parameters.collect = collectParam->load();
-    parameters.always = alwaysParam->load();
-    parameters.wipe = wipeParam->load();
-    parameters.inspect = inspectParam->load();
-
-    engine.setParameters(parameters);
-    engine.processBlock(buffer);
-}
-
-bool MemoryDelayAudioProcessor::hasEditor() const
-{
-    return true;
-}
-
-juce::AudioProcessorEditor* MemoryDelayAudioProcessor::createEditor()
-{
-    return new MemoryDelayAudioProcessorEditor(*this);
-}
-
-void MemoryDelayAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
-{
-    auto state = apvts.copyState();
-    std::unique_ptr<juce::XmlElement> xml(state.createXml());
-    copyXmlToBinary(*xml, destData);
-}
-
-void MemoryDelayAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
-{
-    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-
-    if (xmlState != nullptr)
-        if (xmlState->hasTagName(apvts.state.getType()))
-            apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
-}
-
-juce::AudioProcessorValueTreeState::ParameterLayout MemoryDelayAudioProcessor::createParameterLayout()
+namespace {
+constexpr float kMaxDelaySeconds = 10.0f;
+// Free function to create the parameter layout.  This uses
+// std::make_unique to create AudioParameter instances, which is the
+// recommended pattern for JUCE 6+.  See JUCE forum discussion on
+// using ParameterLayout with AudioProcessorValueTreeState【670410746428985†L124-L134】.
+juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
-
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(sizeId, "Size",
-                                                                 juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                                 0.5f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(repeatsId, "Repeats",
-                                                                 juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                                 0.35f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(scanId, "Scan",
-                                                                 juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                                 0.0f));
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(scanModeId, "Scan Mode",
-                                                                  juce::StringArray{"Forward", "PingPong", "Random"},
-                                                                  0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(spreadId, "Spread",
-                                                                 juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                                 0.0f));
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(routingId, "Routing",
-                                                                  juce::StringArray{"Stereo", "Swap", "Mid/Side"},
-                                                                  0));
-    params.push_back(std::make_unique<juce::AudioParameterBool>(collectId, "Collect", true));
-    params.push_back(std::make_unique<juce::AudioParameterBool>(alwaysId, "Always", false));
-    params.push_back(std::make_unique<juce::AudioParameterBool>(wipeId, "Wipe", false));
-    params.push_back(std::make_unique<juce::AudioParameterBool>(inspectId, "Inspect", false));
-
+    // Mix: 0 = dry, 1 = wet
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("mix", "Mix", 0.0f, 1.0f, 0.5f));
+    // Scan: manual delay position 0..1
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("scan", "Scan", 0.0f, 1.0f, 0.0f));
+    // Auto Scan Rate: 0 = manual, otherwise rate in Hz
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("autoScanRate", "Auto Scan Rate", 0.0f, 2.0f, 0.0f));
+    // Spread: additional offset between playheads in seconds (-2..2)
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("spread", "Spread", -2.0f, 2.0f, 0.0f));
+    // Feedback: 0..0.99
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("feedback", "Feedback", 0.0f, 0.99f, 0.0f));
+    // Time: maximum delay length in seconds (0.1..10)
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("time", "Time", 0.1f, kMaxDelaySeconds, 1.0f));
+    // Character: macro controlling modifier intensity
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("character", "Character", 0.0f, 1.0f, 0.0f));
+    // Stereo Mode: Independent / Linked / Cross
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("stereoMode", "Stereo Mode",
+        juce::StringArray { "Independent", "Linked", "Cross" }, 0));
+    // Feedback Mode: Collect / Feed / Closed
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("mode", "Mode",
+        juce::StringArray { "Collect", "Feed", "Closed" }, 1));
+    // Random seed for deterministic modulation
+    params.push_back(std::make_unique<juce::AudioParameterInt>("randomSeed", "Random Seed", 0, 65535, 1));
     return { params.begin(), params.end() };
+}
+} // namespace
+
+StereoMemoryDelayAudioProcessor::StereoMemoryDelayAudioProcessor()
+    : AudioProcessor (BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+#endif
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+    ),
+    parameters (*this, nullptr, juce::Identifier("PARAMS"), createParameterLayout())
+{
+    // create DSP engine
+    engine = std::make_unique<MemoryDelayEngine>();
+}
+
+StereoMemoryDelayAudioProcessor::~StereoMemoryDelayAudioProcessor() {}
+
+const juce::String StereoMemoryDelayAudioProcessor::getName() const { return JucePlugin_Name; }
+
+bool StereoMemoryDelayAudioProcessor::acceptsMidi() const { return false; }
+bool StereoMemoryDelayAudioProcessor::producesMidi() const { return false; }
+bool StereoMemoryDelayAudioProcessor::isMidiEffect() const { return false; }
+double StereoMemoryDelayAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+
+int StereoMemoryDelayAudioProcessor::getNumPrograms() { return 1; }
+int StereoMemoryDelayAudioProcessor::getCurrentProgram() { return 0; }
+void StereoMemoryDelayAudioProcessor::setCurrentProgram (int) {}
+const juce::String StereoMemoryDelayAudioProcessor::getProgramName (int) { return {}; }
+void StereoMemoryDelayAudioProcessor::changeProgramName (int, const juce::String&) {}
+
+void StereoMemoryDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+{
+    // Allocate DSP engine and prepare resources
+    engine->prepare(sampleRate, samplesPerBlock, kMaxDelaySeconds);
+    // Set initial parameter values
+    engine->setMix(*parameters.getRawParameterValue("mix"));
+    engine->setScan(*parameters.getRawParameterValue("scan"));
+    engine->setAutoScanRate(*parameters.getRawParameterValue("autoScanRate"));
+    engine->setSpread(*parameters.getRawParameterValue("spread"));
+    engine->setFeedback(*parameters.getRawParameterValue("feedback"));
+    engine->setTime(*parameters.getRawParameterValue("time"));
+    engine->setCharacter(*parameters.getRawParameterValue("character"));
+    engine->setStereoMode(static_cast<int>(*parameters.getRawParameterValue("stereoMode")));
+    engine->setMode(static_cast<int>(*parameters.getRawParameterValue("mode")));
+    engine->setRandomSeed(static_cast<int>(*parameters.getRawParameterValue("randomSeed")));
+}
+
+void StereoMemoryDelayAudioProcessor::releaseResources()
+{
+    // Release resources
+    engine.reset();
+    engine = std::make_unique<MemoryDelayEngine>();
+}
+
+bool StereoMemoryDelayAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+{
+#if JucePlugin_IsMidiEffect
+    juce::ignoreUnused (layouts);
+    return true;
+#else
+    // Only stereo in/out supported
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+    return true;
+#endif
+}
+
+void StereoMemoryDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+    juce::ignoreUnused(midiMessages);
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    // Clear any output channels not used
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
+
+    // Update engine parameters from APVTS
+    engine->setMix(*parameters.getRawParameterValue("mix"));
+    engine->setScan(*parameters.getRawParameterValue("scan"));
+    engine->setAutoScanRate(*parameters.getRawParameterValue("autoScanRate"));
+    engine->setSpread(*parameters.getRawParameterValue("spread"));
+    engine->setFeedback(*parameters.getRawParameterValue("feedback"));
+    engine->setTime(*parameters.getRawParameterValue("time"));
+    engine->setCharacter(*parameters.getRawParameterValue("character"));
+    engine->setStereoMode(static_cast<int>(*parameters.getRawParameterValue("stereoMode")));
+    engine->setMode(static_cast<int>(*parameters.getRawParameterValue("mode")));
+    engine->setRandomSeed(static_cast<int>(*parameters.getRawParameterValue("randomSeed")));
+
+    juce::AudioPlayHead::CurrentPositionInfo posInfo;
+    if (auto* playHead = getPlayHead())
+        playHead->getCurrentPosition(posInfo);
+
+    int64_t transportSamples = -1;
+    if (posInfo.timeInSamples > 0)
+        transportSamples = posInfo.timeInSamples;
+    else if (posInfo.ppqPosition > 0.0 && posInfo.bpm > 0.0)
+    {
+        const double seconds = posInfo.ppqPosition * (60.0 / posInfo.bpm);
+        transportSamples = static_cast<int64_t>(seconds * getSampleRate());
+    }
+    engine->setTransportPosition(transportSamples, posInfo.isPlaying);
+    // Process audio
+    engine->processBlock(buffer);
+}
+
+bool StereoMemoryDelayAudioProcessor::hasEditor() const { return true; }
+
+juce::AudioProcessorEditor* StereoMemoryDelayAudioProcessor::createEditor() { return new StereoMemoryDelayAudioProcessorEditor (*this); }
+
+void StereoMemoryDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    // TODO: store state using parameters
+    juce::MemoryOutputStream stream(destData, true);
+    parameters.state.writeToStream(stream);
+}
+
+void StereoMemoryDelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+{
+    // TODO: restore state using parameters
+    juce::ValueTree tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid())
+        parameters.state = tree;
+}
+
+void StereoMemoryDelayAudioProcessor::getVisualSnapshot(MemoryDelayEngine::VisualSnapshot& snapshot) const
+{
+    if (engine != nullptr)
+        engine->getVisualSnapshot(snapshot);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new MemoryDelayAudioProcessor();
+    return new StereoMemoryDelayAudioProcessor();
 }

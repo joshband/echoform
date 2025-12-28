@@ -2,42 +2,66 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "TokenLookAndFeel.h"
+#include "InspectPanel.h"
 
-class MemoryDelayAudioProcessorEditor : public juce::AudioProcessorEditor
+class StereoMemoryDelayAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    explicit MemoryDelayAudioProcessorEditor(MemoryDelayAudioProcessor& processor);
-    ~MemoryDelayAudioProcessorEditor() override;
+    StereoMemoryDelayAudioProcessorEditor (StereoMemoryDelayAudioProcessor&);
+    ~StereoMemoryDelayAudioProcessorEditor() override;
 
-    void paint(juce::Graphics& g) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
-    using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
-    using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-    using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
+    StereoMemoryDelayAudioProcessor& audioProcessor;
 
-    MemoryDelayAudioProcessor& audioProcessor;
+    // UI components
+    juce::Component playPanel;
+    InspectPanel inspectPanel;
+    juce::TextButton inspectButton { "Inspect" };
 
-    juce::ComboBox scanModeBox;
-    juce::ComboBox routingBox;
+    juce::Slider mixSlider;
+    juce::Slider scanSlider;
+    juce::Slider autoScanSlider;
     juce::Slider spreadSlider;
-    juce::ToggleButton collectButton;
-    juce::ToggleButton alwaysButton;
-    juce::ToggleButton wipeButton;
-    juce::ToggleButton inspectButton;
+    juce::Slider feedbackSlider;
+    juce::Slider timeSlider;
+    juce::Slider characterSlider;
+    juce::Slider randomSeedSlider;
 
-    juce::Label scanModeLabel;
-    juce::Label routingLabel;
+    juce::ComboBox stereoModeBox;
+    juce::ComboBox modeBox;
+
+    juce::Label mixLabel;
+    juce::Label scanLabel;
+    juce::Label autoScanLabel;
     juce::Label spreadLabel;
+    juce::Label feedbackLabel;
+    juce::Label timeLabel;
+    juce::Label characterLabel;
+    juce::Label randomSeedLabel;
+    juce::Label stereoModeLabel;
+    juce::Label modeLabel;
 
-    std::unique_ptr<ComboBoxAttachment> scanModeAttachment;
-    std::unique_ptr<ComboBoxAttachment> routingAttachment;
-    std::unique_ptr<SliderAttachment> spreadAttachment;
-    std::unique_ptr<ButtonAttachment> collectAttachment;
-    std::unique_ptr<ButtonAttachment> alwaysAttachment;
-    std::unique_ptr<ButtonAttachment> wipeAttachment;
-    std::unique_ptr<ButtonAttachment> inspectAttachment;
+    // Attachments for binding sliders to parameters
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> scanAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> autoScanAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> spreadAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> timeAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> characterAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> randomSeedAttachment;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MemoryDelayAudioProcessorEditor)
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> stereoModeAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeAttachment;
+
+    // LookAndFeel instance (token‑based theming)
+    TokenLookAndFeel lookAndFeel;
+
+    bool inspectMode { false };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StereoMemoryDelayAudioProcessorEditor)
 };

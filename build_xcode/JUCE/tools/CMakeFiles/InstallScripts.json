@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/tools/cmake_install.cmake",
+		"/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/tools/modules/cmake_install.cmake",
+		"/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/tools/extras/Build/cmake_install.cmake",
+		"/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/tools/extras/Build/juceaide/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
