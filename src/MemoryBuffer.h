@@ -88,6 +88,17 @@ public:
     /** Returns the current maximum delay in samples. */
     int getBufferSize() const { return buffer.getNumSamples(); }
 
+    int getWritePosition() const { return writePos; }
+
+    float getSample(int channel, int index) const
+    {
+        jassert(channel >= 0 && channel < buffer.getNumChannels());
+        if (buffer.getNumSamples() == 0)
+            return 0.0f;
+        index = juce::jlimit(0, buffer.getNumSamples() - 1, index);
+        return buffer.getSample(channel, index);
+    }
+
     /** Writes a single stereo sample into the buffer.  This avoids
         allocating a temporary AudioBuffer for one sample.  Call this
         from the audio thread only. */

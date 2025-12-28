@@ -250,6 +250,10 @@ public:
         snapshot.writeIndex = visualWriteIndex.load();
     }
 
+    int getMaxSamples() const { return buffer.getBufferSize(); }
+    int getWriteIndex() const { return buffer.getWritePosition(); }
+    float debugGetMemorySample(int channel, int index) const { return buffer.getSample(channel, index); }
+
 private:
     float getNextScanOffset()
     {

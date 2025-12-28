@@ -47,3 +47,18 @@ target_link_libraries(StereoMemoryDelay PRIVATE
 target_compile_definitions(StereoMemoryDelay PRIVATE
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
+
+option(ENABLE_TESTS "Build tests" ON)
+if(ENABLE_TESTS)
+    enable_testing()
+    add_executable(MemoryDelayEngineTests
+        tests/MemoryDelayEngineTests.cpp
+    )
+    target_include_directories(MemoryDelayEngineTests PRIVATE src)
+    target_link_libraries(MemoryDelayEngineTests PRIVATE
+        juce::juce_audio_basics
+        juce::juce_core
+    )
+    juce_generate_juce_header(MemoryDelayEngineTests)
+    add_test(NAME MemoryDelayEngineTests COMMAND MemoryDelayEngineTests)
+endif()
