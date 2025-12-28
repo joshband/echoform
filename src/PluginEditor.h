@@ -14,9 +14,6 @@ public:
 
 private:
     StereoMemoryDelayAudioProcessor& processor;
-    juce::Slider randomSeedSlider;
-    juce::Label randomSeedLabel;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> randomSeedAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoMemoryDelayAudioProcessorEditor)
 };

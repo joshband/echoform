@@ -12,10 +12,9 @@ public:
         autoScanTarget = 0.0f;
     }
 
-    void updateRandomSeed(double randomSeed, double transportPosition)
+    void setRandomSeed(double randomSeed, double transportPosition)
     {
-        randomGenerator.setSeed(randomSeed, transportPosition);
-        autoScanTarget = static_cast<float>(randomGenerator.nextFloat01());
+        randomGenerator.setSeed(randomSeed + transportPosition);
     }
 
     void processBlock(juce::AudioBuffer<float>& buffer)

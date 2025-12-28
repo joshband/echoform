@@ -6,11 +6,10 @@
 class RandomGenerator
 {
 public:
-    void setSeed(double seedValue, double transportPosition)
+    void setSeed(double seedValue)
     {
         const auto seedBits = hashDouble(seedValue);
-        const auto transportBits = hashDouble(transportPosition);
-        const std::uint64_t combined = mixSeed(seedBits ^ (transportBits + 0x9e3779b97f4a7c15ULL));
+        const std::uint64_t combined = mixSeed(seedBits);
         state = combined != 0u ? combined : 0x6a09e667f3bcc909ULL;
     }
 

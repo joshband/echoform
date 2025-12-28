@@ -102,9 +102,7 @@ void StereoMemoryDelayAudioProcessor::processBlock(juce::AudioBuffer<float>& buf
 
     const auto seedValue = parameters.getRawParameterValue("randomSeed");
     if (seedValue != nullptr)
-    {
-        engine.updateRandomSeed(static_cast<double>(seedValue->load()), transportPositionSamples.load());
-    }
+        engine.setRandomSeed(static_cast<double>(seedValue->load()), transportPositionSamples.load());
 
     engine.processBlock(buffer);
 }
