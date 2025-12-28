@@ -1,0 +1,14 @@
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/StereoMemoryDelay.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/StereoMemoryDelay_All.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/StereoMemoryDelay_AU.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/StereoMemoryDelay_VST3.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/StereoMemoryDelay_vst3_helper.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/install.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/ALL_BUILD.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/CMakeFiles/ZERO_CHECK.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/CMakeFiles/install.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/CMakeFiles/ALL_BUILD.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/CMakeFiles/ZERO_CHECK.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/modules/CMakeFiles/install.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/extras/Build/CMakeFiles/install.dir
+/Users/noisebox/Documents/3_Development/Repos/echoform/build_xcode/JUCE/extras/Build/juceaide/CMakeFiles/install.dir

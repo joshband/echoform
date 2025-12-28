@@ -43,3 +43,7 @@ target_link_libraries(StereoMemoryDelay PRIVATE
     juce::juce_gui_basics
     juce::juce_gui_extra
 )
+
+target_compile_definitions(StereoMemoryDelay PRIVATE
+    JUCE_VST3_CAN_REPLACE_VST2=0
+)

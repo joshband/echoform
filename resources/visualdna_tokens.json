@@ -1,0 +1,27 @@
+{
+  "colors": {
+    "background": { "value": "#0f1218" },
+    "panel": { "value": "#1a1f2a" },
+    "accent": { "value": "#f0c56b" },
+    "text": { "value": "#f4f4f4" },
+    "mutedText": { "value": "#9aa0a6" },
+    "track": { "value": "#2a3140" }
+  },
+  "font": {
+    "family": { "value": "Avenir Next" },
+    "size": { "value": 14 },
+    "sizeSmall": { "value": 12 },
+    "sizeLarge": { "value": 18 }
+  },
+  "spacing": {
+    "xs": { "value": 6 },
+    "sm": { "value": 10 },
+    "md": { "value": 16 },
+    "lg": { "value": 24 }
+  },
+  "radius": {
+    "sm": { "value": 6 },
+    "md": { "value": 10 },
+    "lg": { "value": 16 }
+  }
+}
