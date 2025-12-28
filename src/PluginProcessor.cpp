@@ -102,7 +102,11 @@ void StereoMemoryDelayAudioProcessor::processBlock(juce::AudioBuffer<float>& buf
 
     const auto seedValue = parameters.getRawParameterValue("randomSeed");
     if (seedValue != nullptr)
-        engine.setRandomSeed(static_cast<double>(seedValue->load()), transportPositionSamples.load());
+    {
+        const double seed = static_cast<double>(seedValue->load());
+        randomSeedValue.store(seed);
+        engine.setRandomSeed(seed, transportPositionSamples.load());
+    }
 
     engine.processBlock(buffer);
 }
@@ -144,6 +148,11 @@ juce::AudioProcessorValueTreeState& StereoMemoryDelayAudioProcessor::getValueTre
 double StereoMemoryDelayAudioProcessor::getTransportPositionSamples() const noexcept
 {
     return transportPositionSamples.load();
+}
+
+double StereoMemoryDelayAudioProcessor::getRandomSeedValue() const noexcept
+{
+    return randomSeedValue.load();
 }
 
 void StereoMemoryDelayAudioProcessor::updateTransportPosition()

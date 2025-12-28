@@ -39,6 +39,7 @@ public:
 
     juce::AudioProcessorValueTreeState& getValueTreeState() noexcept;
     double getTransportPositionSamples() const noexcept;
+    double getRandomSeedValue() const noexcept;
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -47,6 +48,7 @@ private:
     juce::AudioProcessorValueTreeState parameters;
     MemoryDelayEngine engine;
     std::atomic<double> transportPositionSamples { 0.0 };
+    std::atomic<double> randomSeedValue { 0.0 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StereoMemoryDelayAudioProcessor)
 };
