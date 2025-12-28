@@ -47,6 +47,7 @@ private:
 
     juce::AudioProcessorValueTreeState parameters;
     MemoryDelayEngine engine;
+    double sampleRateHz = 44100.0;
     std::atomic<double> transportPositionSamples { 0.0 };
     std::atomic<double> randomSeedValue { 0.0 };
 

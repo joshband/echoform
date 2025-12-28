@@ -74,6 +74,7 @@ void StereoMemoryDelayAudioProcessor::changeProgramName(int index, const juce::S
 
 void StereoMemoryDelayAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+    sampleRateHz = sampleRate;
     engine.prepare(sampleRate, samplesPerBlock);
 }
 
@@ -164,6 +165,16 @@ void StereoMemoryDelayAudioProcessor::updateTransportPosition()
         {
             if (auto timeInSamples = positionInfo->getTimeInSamples())
                 positionSamples = static_cast<double>(*timeInSamples);
+            else if (auto timeInSeconds = positionInfo->getTimeInSeconds())
+                positionSamples = static_cast<double>(*timeInSeconds) * sampleRateHz;
+            else if (auto ppqPosition = positionInfo->getPpqPosition())
+            {
+                if (auto bpm = positionInfo->getBpm())
+                {
+                    const double seconds = (static_cast<double>(*ppqPosition) * 60.0) / static_cast<double>(*bpm);
+                    positionSamples = seconds * sampleRateHz;
+                }
+            }
         }
     }
 
