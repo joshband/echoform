@@ -43,3 +43,14 @@ target_link_libraries(StereoMemoryDelay PRIVATE
     juce::juce_gui_basics
     juce::juce_gui_extra
 )
+
+option(ENABLE_TESTS "Build tests" ON)
+if(ENABLE_TESTS)
+    enable_testing()
+    add_executable(MemoryDelayEngineTests
+        tests/MemoryDelayEngineTests.cpp
+        src/MemoryDelayEngine.cpp
+    )
+    target_include_directories(MemoryDelayEngineTests PRIVATE src)
+    add_test(NAME MemoryDelayEngineTests COMMAND MemoryDelayEngineTests)
+endif()
