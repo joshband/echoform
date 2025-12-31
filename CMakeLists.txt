@@ -27,6 +27,8 @@ juce_add_plugin(StereoMemoryDelay
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui_runtime/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui_runtime/*.h"
 )
 
 # Add the plugin target
