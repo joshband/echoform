@@ -17,6 +17,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     params.push_back(std::make_unique<juce::AudioParameterFloat>("mix", "Mix", 0.0f, 1.0f, 0.5f));
     // Time: 0..30 seconds window for the tape playback head
     params.push_back(std::make_unique<juce::AudioParameterFloat>("time", "Time", 0.0f, 30.0f, 3.0f));
+    // Feedback: 0..0.98 loop feedback amount
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("feedback", "Feedback", 0.0f, 0.98f, 0.65f));
     // Host bypass parameter
     params.push_back(std::make_unique<juce::AudioParameterBool>("bypass", "Bypass", false));
     return { params.begin(), params.end() };
@@ -65,6 +67,7 @@ void StereoMemoryDelayAudioProcessor::prepareToPlay (double sampleRate, int samp
     engine->setMix(*parameters.getRawParameterValue("mix"));
     engine->setTapeMode(true);
     engine->setTapeWindowSeconds(*parameters.getRawParameterValue("time"));
+    engine->setFeedback(*parameters.getRawParameterValue("feedback"));
 }
 
 void StereoMemoryDelayAudioProcessor::releaseResources()
@@ -103,6 +106,7 @@ void StereoMemoryDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
     // Update engine parameters from APVTS
     engine->setMix(*parameters.getRawParameterValue("mix"));
     engine->setTapeWindowSeconds(*parameters.getRawParameterValue("time"));
+    engine->setFeedback(*parameters.getRawParameterValue("feedback"));
     bool hostBypassed = false;
     if (auto* bypassParam = getBypassParameter())
         hostBypassed = bypassParam->getValue() > 0.5f;
@@ -143,7 +147,7 @@ bool StereoMemoryDelayAudioProcessor::hasEditor() const { return true; }
 juce::AudioProcessorEditor* StereoMemoryDelayAudioProcessor::createEditor()
 {
 #if ECHOFORM_USE_VDNA_UI
-    return new VisualDNAEditor(*this);
+    return new StereoMemoryDelayAudioProcessorEditor(*this);
 #else
     return new StereoMemoryDelayAudioProcessorEditor(*this);
 #endif
