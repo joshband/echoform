@@ -17,25 +17,27 @@ public:
 
         constexpr double sampleRate = 48000.0;
         constexpr int blockSize = 128;
-        constexpr float maxDelaySeconds = 10.0f;
+        constexpr float bufferSeconds = 10.0f;
 
         MemoryDelayEngine engineA;
         MemoryDelayEngine engineB;
-        engineA.prepare(sampleRate, blockSize, maxDelaySeconds);
-        engineB.prepare(sampleRate, blockSize, maxDelaySeconds);
+        engineA.prepare(sampleRate, blockSize, bufferSeconds);
+        engineB.prepare(sampleRate, blockSize, bufferSeconds);
 
         engineA.setMix(1.0f);
         engineB.setMix(1.0f);
         engineA.setScan(0.25f);
         engineB.setScan(0.25f);
+        engineA.setScanMode(static_cast<int>(MemoryDelayEngine::ScanMode::Auto));
+        engineB.setScanMode(static_cast<int>(MemoryDelayEngine::ScanMode::Auto));
         engineA.setAutoScanRate(0.35f);
         engineB.setAutoScanRate(0.35f);
         engineA.setSpread(0.3f);
         engineB.setSpread(0.3f);
         engineA.setFeedback(0.6f);
         engineB.setFeedback(0.6f);
-        engineA.setTime(5.0f);
-        engineB.setTime(5.0f);
+        engineA.setSize(5.0f);
+        engineB.setSize(5.0f);
         engineA.setCharacter(0.7f);
         engineB.setCharacter(0.7f);
         engineA.setStereoMode(static_cast<int>(MemoryDelayEngine::StereoMode::Independent));

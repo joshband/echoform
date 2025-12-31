@@ -53,9 +53,11 @@ target_compile_definitions(StereoMemoryDelay PRIVATE
 option(ENABLE_TESTS "Build tests" ON)
 if(ENABLE_TESTS)
     enable_testing()
-    add_executable(MemoryDelayEngineTests
+    juce_add_console_app(MemoryDelayEngineTests
+        PRODUCT_NAME "MemoryDelayEngineTests"
+    )
+    target_sources(MemoryDelayEngineTests PRIVATE
         tests/MemoryDelayEngineTests.cpp
-        src/MemoryDelayEngine.cpp
     )
     target_include_directories(MemoryDelayEngineTests PRIVATE src)
     target_link_libraries(MemoryDelayEngineTests PRIVATE

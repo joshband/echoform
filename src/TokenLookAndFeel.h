@@ -29,9 +29,9 @@ public:
         juce::Colour mutedText { 0xff9aa0a6 };
         juce::Colour track { 0xff2a3140 };
         juce::String fontFamily { juce::Font::getDefaultSansSerifFontName() };
-        float fontSize { 14.0f };
-        float fontSizeSmall { 12.0f };
-        float fontSizeLarge { 18.0f };
+        float fontSize { 15.0f };
+        float fontSizeSmall { 13.0f };
+        float fontSizeLarge { 19.0f };
         Spacing spacing;
         Radius radius;
     };
