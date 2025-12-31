@@ -150,7 +150,14 @@ void StereoMemoryDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
 
 bool StereoMemoryDelayAudioProcessor::hasEditor() const { return true; }
 
-juce::AudioProcessorEditor* StereoMemoryDelayAudioProcessor::createEditor() { return new StereoMemoryDelayAudioProcessorEditor (*this); }
+juce::AudioProcessorEditor* StereoMemoryDelayAudioProcessor::createEditor()
+{
+#if ECHOFORM_USE_VDNA_UI
+    return new VisualDNAEditor(*this);
+#else
+    return new StereoMemoryDelayAudioProcessorEditor(*this);
+#endif
+}
 
 void StereoMemoryDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
