@@ -27,6 +27,8 @@ juce_add_plugin(StereoMemoryDelay
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui_runtime/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui_runtime/*.h"
 )
 
 # Add the plugin target
@@ -51,9 +53,11 @@ target_compile_definitions(StereoMemoryDelay PRIVATE
 option(ENABLE_TESTS "Build tests" ON)
 if(ENABLE_TESTS)
     enable_testing()
-    add_executable(MemoryDelayEngineTests
+    juce_add_console_app(MemoryDelayEngineTests
+        PRODUCT_NAME "MemoryDelayEngineTests"
+    )
+    target_sources(MemoryDelayEngineTests PRIVATE
         tests/MemoryDelayEngineTests.cpp
-        src/MemoryDelayEngine.cpp
     )
     target_include_directories(MemoryDelayEngineTests PRIVATE src)
     target_link_libraries(MemoryDelayEngineTests PRIVATE

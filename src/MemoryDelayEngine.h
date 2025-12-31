@@ -14,7 +14,6 @@
 #include <atomic>
 #include <cmath>
 #include <cstddef>
-#include <vector>
 
 class MemoryDelayEngine
 {
@@ -33,6 +32,19 @@ public:
         Closed
     };
 
+    enum class ScanMode
+    {
+        Manual = 0,
+        Auto
+    };
+
+    enum class RoutingMode
+    {
+        In = 0,
+        Out,
+        Feed
+    };
+
     static constexpr int kVisualBins = 96;
 
     struct VisualSnapshot
@@ -46,37 +58,51 @@ public:
     MemoryDelayEngine() = default;
     ~MemoryDelayEngine() = default;
 
-    void prepare(double newSampleRate, int maxBlockSize, float maxDelaySeconds)
+    void prepare(double newSampleRate, int maxBlockSize, float maxBufferSeconds)
     {
         sampleRate = newSampleRate;
-        bufferMaxSeconds = juce::jmax(0.1f, maxDelaySeconds);
+        bufferMaxSeconds = juce::jmax(kMemorySeconds, maxBufferSeconds);
         maxBlock = juce::jmax(1, maxBlockSize);
-        maxDelaySeconds = bufferMaxSeconds;
+        sizeSecondsTarget = juce::jlimit(kMinSizeSeconds,
+                                         juce::jmin(kMaxSizeSeconds, bufferMaxSeconds),
+                                         sizeSecondsTarget);
+        sizeSecondsCurrent = sizeSecondsTarget;
+        sizeSecondsPrevious = sizeSecondsTarget;
+        sizeCrossfadeSamplesRemaining = 0;
+        sizeCrossfadeSamplesTotal = 0;
 
         buffer.prepare(sampleRate, bufferMaxSeconds);
         primary.setMemoryBuffer(&buffer);
         secondary.setMemoryBuffer(&buffer);
-        primary.setMaxDelaySeconds(maxDelaySeconds);
-        secondary.setMaxDelaySeconds(maxDelaySeconds);
+        primary.setMaxDelaySeconds(sizeSecondsCurrent);
+        secondary.setMaxDelaySeconds(sizeSecondsCurrent);
+        updateSpreadSeconds();
 
-        primaryModifiers.prepare(sampleRate, maxBlock, 2);
-        secondaryModifiers.prepare(sampleRate, maxBlock, 2);
+        modifierBankA.prepare(sampleRate, maxBlock, 2);
+        modifierBankB.prepare(sampleRate, maxBlock, 2);
 
         resetVisualState();
         autoScanOffset = manualScan;
         autoScanSamplesRemaining = 0;
-        autoScanRampRemaining = 0;
+        autoScanSamplesTotal = 0;
         requestReseed = true;
     }
 
     void reset()
     {
         buffer.prepare(sampleRate, bufferMaxSeconds);
-        primary.setMaxDelaySeconds(maxDelaySeconds);
-        secondary.setMaxDelaySeconds(maxDelaySeconds);
-        primaryModifiers.reset();
-        secondaryModifiers.reset();
+        sizeSecondsCurrent = sizeSecondsTarget;
+        sizeSecondsPrevious = sizeSecondsTarget;
+        sizeCrossfadeSamplesRemaining = 0;
+        sizeCrossfadeSamplesTotal = 0;
+        primary.setMaxDelaySeconds(sizeSecondsCurrent);
+        secondary.setMaxDelaySeconds(sizeSecondsCurrent);
+        updateSpreadSeconds();
+        modifierBankA.reset();
+        modifierBankB.reset();
         resetVisualState();
+        if (tapeMode)
+            resetTapeState();
     }
 
     void setMix(float newMix) { mix = juce::jlimit(0.0f, 1.0f, newMix); }
@@ -86,6 +112,8 @@ public:
         manualScan = juce::jlimit(0.0f, 1.0f, newScan);
         if (autoScanRateHz <= 0.0f)
             autoScanOffset = manualScan;
+        else
+            autoScanSamplesRemaining = 0;
     }
 
     void setAutoScanRate(float newRateHz)
@@ -100,13 +128,13 @@ public:
             autoScanOffset = manualScan;
 
         autoScanSamplesRemaining = 0;
-        autoScanRampRemaining = 0;
+        autoScanSamplesTotal = 0;
     }
 
-    void setSpread(float newSpreadSeconds)
+    void setSpread(float newSpreadNormalized)
     {
-        spreadSeconds = newSpreadSeconds;
-        secondary.setSpread(newSpreadSeconds);
+        spreadNormalized = juce::jlimit(0.0f, 1.0f, newSpreadNormalized);
+        updateSpreadSeconds();
     }
 
     void setFeedback(float newFeedback)
@@ -114,11 +142,77 @@ public:
         feedback = juce::jlimit(0.0f, 0.98f, newFeedback);
     }
 
-    void setTime(float newTimeSeconds)
+    void setTapeMode(bool enabled)
     {
-        maxDelaySeconds = juce::jlimit(0.1f, bufferMaxSeconds, newTimeSeconds);
-        primary.setMaxDelaySeconds(maxDelaySeconds);
-        secondary.setMaxDelaySeconds(maxDelaySeconds);
+        tapeMode = enabled;
+        if (!tapeMode)
+            return;
+
+        spreadNormalized = 0.0f;
+        feedback = kTapeFeedback;
+        mode = FeedbackMode::Feed;
+        scanMode = ScanMode::Manual;
+        autoScanRateHz = 0.0f;
+        manualScan = 0.0f;
+        alwaysRecord = true;
+        routingModeA = RoutingMode::Out;
+        routingModeB = RoutingMode::Out;
+        modifierBankA.setModValues(0.0f, 0.0f, 0.0f);
+        modifierBankB.setModValues(0.0f, 0.0f, 0.0f);
+        character = 0.0f;
+        setTapeWindowSeconds(tapeWindowSeconds);
+        resetTapeState();
+    }
+
+    void setTapeWindowSeconds(float seconds)
+    {
+        tapeWindowSeconds = juce::jlimit(0.0f, kTapeMaxWindowSeconds, seconds);
+        if (!tapeMode)
+            return;
+
+        sizeSecondsTarget = tapeWindowSeconds;
+        sizeSecondsCurrent = tapeWindowSeconds;
+        sizeSecondsPrevious = tapeWindowSeconds;
+        sizeCrossfadeSamplesRemaining = 0;
+        sizeCrossfadeSamplesTotal = 0;
+        primary.setMaxDelaySeconds(sizeSecondsCurrent);
+        secondary.setMaxDelaySeconds(sizeSecondsCurrent);
+        updateSpreadSeconds();
+
+        if (sizeSecondsCurrent <= 0.0f)
+        {
+            tapeOffsetSecondsCurrent = 0.0f;
+            tapeOffsetSecondsStart = 0.0f;
+            tapeOffsetSecondsTarget = 0.0f;
+        }
+        else
+        {
+            tapeOffsetSecondsCurrent = juce::jlimit(0.0f, sizeSecondsCurrent, tapeOffsetSecondsCurrent);
+            tapeOffsetSecondsStart = tapeOffsetSecondsCurrent;
+            tapeOffsetSecondsTarget = tapeOffsetSecondsCurrent;
+        }
+    }
+
+    void setSize(float newSizeSeconds)
+    {
+        const float clamped = juce::jlimit(kMinSizeSeconds,
+                                           juce::jmin(kMaxSizeSeconds, bufferMaxSeconds),
+                                           newSizeSeconds);
+
+        if (std::abs(clamped - sizeSecondsTarget) < kSizeEpsilon)
+            return;
+
+        if (sizeCrossfadeSamplesRemaining > 0 && sizeCrossfadeSamplesTotal > 0)
+        {
+            const float progress = 1.0f - (static_cast<float>(sizeCrossfadeSamplesRemaining)
+                                           / static_cast<float>(sizeCrossfadeSamplesTotal));
+            sizeSecondsCurrent = sizeSecondsPrevious + (sizeSecondsTarget - sizeSecondsPrevious) * progress;
+        }
+
+        sizeSecondsPrevious = sizeSecondsCurrent;
+        sizeSecondsTarget = clamped;
+        sizeCrossfadeSamplesTotal = juce::jmax(1, static_cast<int>(sampleRate * kSizeCrossfadeSeconds));
+        sizeCrossfadeSamplesRemaining = sizeCrossfadeSamplesTotal;
     }
 
     void setStereoMode(int modeIndex)
@@ -131,11 +225,75 @@ public:
         mode = static_cast<FeedbackMode>(juce::jlimit(0, 2, modeIndex));
     }
 
+    void setScanMode(int modeIndex)
+    {
+        scanMode = static_cast<ScanMode>(juce::jlimit(0, 1, modeIndex));
+        if (scanMode == ScanMode::Manual)
+            autoScanOffset = manualScan;
+        autoScanSamplesRemaining = 0;
+        autoScanSamplesTotal = 0;
+    }
+
+    void setRoutingModeA(int modeIndex)
+    {
+        routingModeA = static_cast<RoutingMode>(juce::jlimit(0, 2, modeIndex));
+    }
+
+    void setRoutingModeB(int modeIndex)
+    {
+        routingModeB = static_cast<RoutingMode>(juce::jlimit(0, 2, modeIndex));
+    }
+
+    void setModifierBankA(float mod1, float mod2, float mod3)
+    {
+        modifierBankA.setModValues(mod1, mod2, mod3);
+    }
+
+    void setModifierBankB(float mod1, float mod2, float mod3)
+    {
+        modifierBankB.setModValues(mod1, mod2, mod3);
+    }
+
+    void setAlwaysRecord(bool shouldAlwaysRecord)
+    {
+        alwaysRecord = shouldAlwaysRecord;
+    }
+
+    void setDryKill(bool shouldDryKill)
+    {
+        dryKill = shouldDryKill;
+    }
+
+    void setLatch(bool shouldLatch)
+    {
+        latchEnabled = shouldLatch;
+    }
+
+    void setTrails(bool shouldTrail)
+    {
+        trailsEnabled = shouldTrail;
+    }
+
+    void setMemoryDry(bool shouldMemoryDry)
+    {
+        memoryDryEnabled = shouldMemoryDry;
+    }
+
+    void setWipe(bool shouldWipe)
+    {
+        wipeEnabled = shouldWipe;
+    }
+
+    void setBypassed(bool isBypassed)
+    {
+        bypassed = isBypassed;
+    }
+
     void setCharacter(float newCharacter)
     {
         character = juce::jlimit(0.0f, 1.0f, newCharacter);
-        primaryModifiers.setCharacter(character);
-        secondaryModifiers.setCharacter(character);
+        modifierBankA.setCharacter(character);
+        modifierBankB.setCharacter(character);
     }
 
     void setRandomSeed(int newSeed)
@@ -162,18 +320,38 @@ public:
     {
         updateRandomSeedIfNeeded();
 
+        if (bypassed != lastBypassed)
+        {
+            const bool allowTrails = trailsEnabled && !memoryDryEnabled;
+            if (bypassed && !alwaysRecord && mode != FeedbackMode::Collect && !allowTrails)
+                buffer.clear();
+            lastBypassed = bypassed;
+        }
+
         const int numSamples = audioBuffer.getNumSamples();
-        const float dryMix = 1.0f - mix;
+        const float dryMix = dryKill ? 0.0f : (1.0f - mix);
+        const float wetMix = mix;
         float energySum = 0.0f;
 
         const int readChannelLeft = getReadChannel(0);
         const int readChannelRight = getReadChannel(1);
 
         float lastOffset = manualScan;
+        constexpr float kCollectDecay = 0.98f;
+
+        if (latchEnabled && !lastLatchEnabled)
+        {
+            latchedOffset = (scanMode == ScanMode::Manual) ? manualScan : autoScanOffset;
+            lastLatchEnabled = true;
+        }
+        else if (!latchEnabled)
+        {
+            lastLatchEnabled = false;
+        }
 
         for (int sample = 0; sample < numSamples; ++sample)
         {
-            const float offset = getNextScanOffset();
+            const float offset = latchEnabled ? latchedOffset : getNextScanOffset();
             lastOffset = offset;
             primary.setOffsetNormalized(offset);
             secondary.setOffsetNormalized(offset);
@@ -181,63 +359,134 @@ public:
             const float inLeft = audioBuffer.getSample(0, sample);
             const float inRight = audioBuffer.getSample(1, sample);
 
-            const float rawPrimaryLeft = primary.readSample(readChannelLeft, sampleRate);
-            const float rawPrimaryRight = primary.readSample(readChannelRight, sampleRate);
-            const float rawSecondaryLeft = secondary.readSample(readChannelLeft, sampleRate);
-            const float rawSecondaryRight = secondary.readSample(readChannelRight, sampleRate);
+            float rawEffectLeft = 0.0f;
+            float rawEffectRight = 0.0f;
+            if (sizeCrossfadeSamplesRemaining > 0 && sizeCrossfadeSamplesTotal > 0)
+            {
+                float rawALeft = 0.0f;
+                float rawARight = 0.0f;
+                float rawBLeft = 0.0f;
+                float rawBRight = 0.0f;
+                computeRawEffect(readChannelLeft, readChannelRight, sizeSecondsPrevious, rawALeft, rawARight);
+                computeRawEffect(readChannelLeft, readChannelRight, sizeSecondsTarget, rawBLeft, rawBRight);
+                const float progress = 1.0f - (static_cast<float>(sizeCrossfadeSamplesRemaining)
+                                               / static_cast<float>(sizeCrossfadeSamplesTotal));
+                rawEffectLeft = rawALeft + (rawBLeft - rawALeft) * progress;
+                rawEffectRight = rawARight + (rawBRight - rawARight) * progress;
 
-            const float rawEffectLeft = 0.5f * (rawPrimaryLeft + rawSecondaryLeft);
-            const float rawEffectRight = 0.5f * (rawPrimaryRight + rawSecondaryRight);
+                --sizeCrossfadeSamplesRemaining;
+                if (sizeCrossfadeSamplesRemaining <= 0)
+                {
+                    sizeSecondsCurrent = sizeSecondsTarget;
+                    sizeSecondsPrevious = sizeSecondsTarget;
+                    sizeCrossfadeSamplesTotal = 0;
+                    updateSpreadSeconds();
+                    primary.setMaxDelaySeconds(sizeSecondsCurrent);
+                    secondary.setMaxDelaySeconds(sizeSecondsCurrent);
+                }
+            }
+            else
+            {
+                computeRawEffect(readChannelLeft, readChannelRight, sizeSecondsCurrent, rawEffectLeft, rawEffectRight);
+            }
 
-            const float procPrimaryLeft = primaryModifiers.processSample(rawPrimaryLeft, 0, random);
-            const float procPrimaryRight = primaryModifiers.processSample(rawPrimaryRight, 1, random);
-            const float procSecondaryLeft = secondaryModifiers.processSample(rawSecondaryLeft, 0, random);
-            const float procSecondaryRight = secondaryModifiers.processSample(rawSecondaryRight, 1, random);
+            float effectLeft = rawEffectLeft;
+            float effectRight = rawEffectRight;
 
-            const float procEffectLeft = 0.5f * (procPrimaryLeft + procSecondaryLeft);
-            const float procEffectRight = 0.5f * (procPrimaryRight + procSecondaryRight);
+            applyModifierBanks(RoutingMode::Out, effectLeft, effectRight);
 
-            const float outLeft = dryMix * inLeft + mix * procEffectLeft;
-            const float outRight = dryMix * inRight + mix * procEffectRight;
+            float outLeft = effectLeft;
+            float outRight = effectRight;
+
+            if (wipeEnabled)
+            {
+                outLeft = wetMix * effectLeft;
+                outRight = wetMix * effectRight;
+            }
+            else if (bypassed)
+            {
+                if (trailsEnabled && !memoryDryEnabled)
+                {
+                    outLeft = (dryKill ? 0.0f : inLeft) + wetMix * effectLeft;
+                    outRight = (dryKill ? 0.0f : inRight) + wetMix * effectRight;
+                }
+                else
+                {
+                    outLeft = inLeft;
+                    outRight = inRight;
+                }
+            }
+            else
+            {
+                outLeft = dryMix * inLeft + wetMix * effectLeft;
+                outRight = dryMix * inRight + wetMix * effectRight;
+            }
 
             audioBuffer.setSample(0, sample, outLeft);
             audioBuffer.setSample(1, sample, outRight);
 
+            energySum += 0.5f * (std::abs(effectLeft) + std::abs(effectRight));
+
+            const bool shouldWrite = !wipeEnabled && !latchEnabled
+                                     && (!bypassed || alwaysRecord || mode == FeedbackMode::Collect);
+            if (!shouldWrite)
+                continue;
+
+            float writeLeft = inLeft;
+            float writeRight = inRight;
+
+            applyModifierBanks(RoutingMode::In, writeLeft, writeRight);
+
             float feedbackSourceLeft = 0.0f;
             float feedbackSourceRight = 0.0f;
 
-            switch (mode)
+            if (!bypassed)
             {
-                case FeedbackMode::Collect:
-                    break;
-                case FeedbackMode::Feed:
-                    // Feed mode keeps modifiers static by feeding raw playhead output.
-                    feedbackSourceLeft = rawEffectLeft;
-                    feedbackSourceRight = rawEffectRight;
-                    break;
-                case FeedbackMode::Closed:
-                    // Closed mode feeds the full output (mix + modifiers) for accumulation.
-                    feedbackSourceLeft = outLeft;
-                    feedbackSourceRight = outRight;
-                    break;
+                switch (mode)
+                {
+                    case FeedbackMode::Collect:
+                        break;
+                    case FeedbackMode::Feed:
+                        // Feed mode recirculates the processed playback (no dry mix).
+                        feedbackSourceLeft = effectLeft;
+                        feedbackSourceRight = effectRight;
+                        break;
+                    case FeedbackMode::Closed:
+                        // Closed mode feeds the full output (mix + modifiers) for accumulation.
+                        feedbackSourceLeft = outLeft;
+                        feedbackSourceRight = outRight;
+                        break;
+                }
             }
 
-            float writeLeft = inLeft + feedback * feedbackSourceLeft;
-            float writeRight = inRight + feedback * feedbackSourceRight;
+            float feedbackLeft = feedback * feedbackSourceLeft;
+            float feedbackRight = feedback * feedbackSourceRight;
+
+            applyModifierBanks(RoutingMode::Feed, feedbackLeft, feedbackRight);
+
+            writeLeft += feedbackLeft;
+            writeRight += feedbackRight;
+
+            if (mode == FeedbackMode::Collect)
+            {
+                const int writeIndex = buffer.getWritePosition();
+                const float existingLeft = buffer.getSample(0, writeIndex);
+                const float existingRight = buffer.getSample(1, writeIndex);
+                writeLeft = existingLeft * kCollectDecay + writeLeft;
+                writeRight = existingRight * kCollectDecay + writeRight;
+            }
 
             writeLeft = std::tanh(writeLeft);
             writeRight = std::tanh(writeRight);
 
             writeToMemory(writeLeft, writeRight);
-
-            energySum += 0.5f * (std::abs(procEffectLeft) + std::abs(procEffectRight));
         }
 
         const int index = visualWriteIndex.load();
         visualEnergy[static_cast<size_t>(index)].store(energySum / static_cast<float>(juce::jmax(1, numSamples)));
         visualWriteIndex.store((index + 1) % kVisualBins);
 
-        const float spreadNorm = (maxDelaySeconds > 0.0f) ? (spreadSeconds / maxDelaySeconds) : 0.0f;
+        const float spreadNorm = spreadNormalized;
         visualPrimary.store(lastOffset);
         visualSecondary.store(juce::jlimit(0.0f, 1.0f, lastOffset + spreadNorm));
     }
@@ -259,24 +508,24 @@ public:
 private:
     float getNextScanOffset()
     {
-        if (autoScanRateHz <= 0.0f)
+        if (tapeMode)
+            return getTapeOffset();
+
+        if (scanMode == ScanMode::Manual || autoScanRateHz <= 0.0f)
             return manualScan;
 
-        if (autoScanSamplesRemaining <= 0)
+        const int samplesPerCycle = juce::jmax(1, static_cast<int>(sampleRate / autoScanRateHz));
+        if (autoScanSamplesRemaining <= 0 || samplesPerCycle != autoScanSamplesTotal)
         {
-            autoScanSamplesRemaining = juce::jmax(1, static_cast<int>(sampleRate / autoScanRateHz));
-            autoScanTarget = random.nextFloat01();
-            const int rampSamples = juce::jmax(1, static_cast<int>(sampleRate * 0.05f));
-            autoScanStep = (autoScanTarget - autoScanOffset) / static_cast<float>(rampSamples);
-            autoScanRampRemaining = rampSamples;
+            autoScanSamplesTotal = samplesPerCycle;
+            autoScanSamplesRemaining = samplesPerCycle;
+            autoScanTarget = random.nextFloat01() * manualScan;
         }
 
-        if (autoScanRampRemaining > 0)
-        {
-            autoScanOffset += autoScanStep;
-            --autoScanRampRemaining;
-        }
-
+        const float phase = 1.0f - (static_cast<float>(autoScanSamplesRemaining)
+                                    / static_cast<float>(autoScanSamplesTotal));
+        const float triangle = (phase <= 0.5f) ? (phase * 2.0f) : (2.0f - phase * 2.0f);
+        autoScanOffset = triangle * autoScanTarget;
         --autoScanSamplesRemaining;
         return juce::jlimit(0.0f, 1.0f, autoScanOffset);
     }
@@ -316,6 +565,18 @@ private:
         return outputChannel;
     }
 
+    void computeRawEffect(int readChannelLeft, int readChannelRight, float sizeSecondsForRead,
+                          float& rawLeft, float& rawRight) const
+    {
+        const float spreadSeconds = spreadNormalized * sizeSecondsForRead;
+        const float primaryLeft = primary.readSample(readChannelLeft, sampleRate, sizeSecondsForRead, 0.0f);
+        const float primaryRight = primary.readSample(readChannelRight, sampleRate, sizeSecondsForRead, 0.0f);
+        const float secondaryLeft = secondary.readSample(readChannelLeft, sampleRate, sizeSecondsForRead, spreadSeconds);
+        const float secondaryRight = secondary.readSample(readChannelRight, sampleRate, sizeSecondsForRead, spreadSeconds);
+        rawLeft = 0.5f * (primaryLeft + secondaryLeft);
+        rawRight = 0.5f * (primaryRight + secondaryRight);
+    }
+
     void writeToMemory(float left, float right)
     {
         switch (stereoMode)
@@ -344,16 +605,131 @@ private:
         visualSecondary.store(0.0f);
     }
 
+    void applyModifierBanks(RoutingMode routing, float& left, float& right)
+    {
+        if (routingModeA == routing)
+        {
+            left = modifierBankA.processSample(left, 0, random);
+            right = modifierBankA.processSample(right, 1, random);
+        }
+        if (routingModeB == routing)
+        {
+            left = modifierBankB.processSample(left, 0, random);
+            right = modifierBankB.processSample(right, 1, random);
+        }
+    }
+
+    void updateSpreadSeconds()
+    {
+        const float spreadSeconds = spreadNormalized * sizeSecondsCurrent;
+        secondary.setSpread(spreadSeconds);
+    }
+
+    float getTapeOffset()
+    {
+        if (sizeSecondsCurrent <= 0.0f)
+            return 0.0f;
+
+        if (tapeSlewSamplesRemaining > 0)
+        {
+            const float progress = 1.0f - (static_cast<float>(tapeSlewSamplesRemaining)
+                                           / static_cast<float>(tapeSlewSamplesTotal));
+            tapeOffsetSecondsCurrent = tapeOffsetSecondsStart
+                                       + (tapeOffsetSecondsTarget - tapeOffsetSecondsStart) * progress;
+            --tapeSlewSamplesRemaining;
+            if (tapeSlewSamplesRemaining <= 0)
+                tapeHoldSamplesRemaining = nextTapeHoldSamples();
+        }
+        else
+        {
+            if (tapeHoldSamplesRemaining <= 0)
+                startTapeJump();
+            else
+                --tapeHoldSamplesRemaining;
+        }
+
+        return juce::jlimit(0.0f, 1.0f, tapeOffsetSecondsCurrent / sizeSecondsCurrent);
+    }
+
+    void startTapeJump()
+    {
+        if (sizeSecondsCurrent <= 0.0f)
+        {
+            tapeOffsetSecondsStart = 0.0f;
+            tapeOffsetSecondsTarget = 0.0f;
+            tapeSlewSamplesRemaining = 0;
+            tapeSlewSamplesTotal = 0;
+            tapeHoldSamplesRemaining = nextTapeHoldSamples();
+            return;
+        }
+
+        tapeOffsetSecondsStart = tapeOffsetSecondsCurrent;
+        const bool deepJump = random.nextFloat01() < kTapeDeepChance;
+        const float minRatio = deepJump ? kTapeDeepMinRatio : kTapeNearMinRatio;
+        const float maxRatio = deepJump ? kTapeDeepMaxRatio : kTapeNearMaxRatio;
+        const float targetRatio = minRatio + random.nextFloat01() * (maxRatio - minRatio);
+        tapeOffsetSecondsTarget = juce::jlimit(0.0f, sizeSecondsCurrent, targetRatio * sizeSecondsCurrent);
+        tapeSlewSamplesTotal = juce::jmax(1, static_cast<int>(sampleRate * kTapeSlewSeconds));
+        tapeSlewSamplesRemaining = tapeSlewSamplesTotal;
+    }
+
+    int nextTapeHoldSamples()
+    {
+        const float holdSeconds = kTapeHoldMinSeconds
+                                  + random.nextFloat01() * (kTapeHoldMaxSeconds - kTapeHoldMinSeconds);
+        return juce::jmax(1, static_cast<int>(holdSeconds * sampleRate));
+    }
+
+    void resetTapeState()
+    {
+        if (sizeSecondsCurrent <= 0.0f)
+        {
+            tapeOffsetSecondsCurrent = 0.0f;
+            tapeOffsetSecondsStart = 0.0f;
+            tapeOffsetSecondsTarget = 0.0f;
+        }
+        else
+        {
+            tapeOffsetSecondsCurrent = sizeSecondsCurrent * kTapeNearMinRatio;
+            tapeOffsetSecondsStart = tapeOffsetSecondsCurrent;
+            tapeOffsetSecondsTarget = tapeOffsetSecondsCurrent;
+        }
+        tapeSlewSamplesRemaining = 0;
+        tapeSlewSamplesTotal = 0;
+        tapeHoldSamplesRemaining = nextTapeHoldSamples();
+    }
+
+    static constexpr float kMinSizeSeconds = 0.05f;
+    static constexpr float kMaxSizeSeconds = 60.0f;
+    static constexpr float kMemorySeconds = 180.0f;
+    static constexpr float kSizeCrossfadeSeconds = 0.05f;
+    static constexpr float kSizeEpsilon = 1.0e-4f;
+    static constexpr float kTapeFeedback = 0.65f;
+    static constexpr float kTapeMaxWindowSeconds = 30.0f;
+    static constexpr float kTapeDefaultWindowSeconds = 3.0f;
+    static constexpr float kTapeNearMinRatio = 0.7f;
+    static constexpr float kTapeNearMaxRatio = 1.0f;
+    static constexpr float kTapeDeepMinRatio = 0.25f;
+    static constexpr float kTapeDeepMaxRatio = 0.9f;
+    static constexpr float kTapeDeepChance = 0.2f;
+    static constexpr float kTapeHoldMinSeconds = 2.0f;
+    static constexpr float kTapeHoldMaxSeconds = 6.0f;
+    static constexpr float kTapeSlewSeconds = 0.25f;
+
     double sampleRate { 44100.0 };
     int maxBlock { 512 };
-    float bufferMaxSeconds { 1.0f };
-    float maxDelaySeconds { 1.0f };
+    float bufferMaxSeconds { kMemorySeconds };
+    float sizeSecondsTarget { 1.0f };
+    float sizeSecondsCurrent { 1.0f };
+    float sizeSecondsPrevious { 1.0f };
+    int sizeCrossfadeSamplesRemaining { 0 };
+    int sizeCrossfadeSamplesTotal { 0 };
 
     MemoryBuffer buffer;
     Playhead primary;
     Playhead secondary;
-    ModifierChain primaryModifiers;
-    ModifierChain secondaryModifiers;
+    ModifierChain modifierBankA;
+    ModifierChain modifierBankB;
     RandomGenerator random;
 
     float mix { 0.5f };
@@ -361,15 +737,35 @@ private:
     float autoScanRateHz { 0.0f };
     float autoScanOffset { 0.0f };
     float autoScanTarget { 0.0f };
-    float autoScanStep { 0.0f };
+    int autoScanSamplesTotal { 0 };
     int autoScanSamplesRemaining { 0 };
-    int autoScanRampRemaining { 0 };
-    float spreadSeconds { 0.0f };
+    float spreadNormalized { 0.0f };
     float feedback { 0.0f };
     float character { 0.0f };
 
     StereoMode stereoMode { StereoMode::Independent };
     FeedbackMode mode { FeedbackMode::Feed };
+    ScanMode scanMode { ScanMode::Manual };
+    RoutingMode routingModeA { RoutingMode::Out };
+    RoutingMode routingModeB { RoutingMode::Out };
+    bool alwaysRecord { false };
+    bool dryKill { false };
+    bool latchEnabled { false };
+    bool trailsEnabled { false };
+    bool memoryDryEnabled { false };
+    bool wipeEnabled { false };
+    bool bypassed { false };
+    bool lastBypassed { false };
+    float latchedOffset { 0.0f };
+    bool lastLatchEnabled { false };
+    bool tapeMode { false };
+    float tapeWindowSeconds { kTapeDefaultWindowSeconds };
+    float tapeOffsetSecondsCurrent { 0.0f };
+    float tapeOffsetSecondsStart { 0.0f };
+    float tapeOffsetSecondsTarget { 0.0f };
+    int tapeHoldSamplesRemaining { 0 };
+    int tapeSlewSamplesRemaining { 0 };
+    int tapeSlewSamplesTotal { 0 };
 
     uint32_t userSeed { 0 };
     int64_t transportSample { -1 };
@@ -382,90 +778,3 @@ private:
     std::atomic<float> visualPrimary { 0.0f };
     std::atomic<float> visualSecondary { 0.0f };
 };
-
-namespace echoform {
-
-enum class ScanMode {
-    Auto,
-    Manual
-};
-
-enum class RoutingMode {
-    In,
-    Out,
-    Feed
-};
-
-struct ModifierBank {
-    float modifier1 = 0.0f;
-    float modifier2 = 0.0f;
-    float modifier3 = 0.0f;
-    RoutingMode routing = RoutingMode::Out;
-};
-
-struct MemoryDelayParameters {
-    float sizeMs = 500.0f;
-    float repeats = 0.35f;
-    float scan = 0.0f;
-    float spread = 0.0f;
-    ScanMode scanMode = ScanMode::Manual;
-    bool collect = false;
-    bool alwaysRecord = false;
-    bool wipe = false;
-    bool inspectEnabled = false;
-    bool bypassed = false;
-    ModifierBank bankA{};
-    ModifierBank bankB{};
-};
-
-struct InspectState {
-    std::vector<float> energy;
-    float primaryPlayhead = 0.0f;
-    float secondaryPlayhead = 0.0f;
-};
-
-class MemoryDelayEngine {
-public:
-    MemoryDelayEngine();
-
-    void prepare(double sampleRate, int maxBlockSize, double maxSeconds = 180.0);
-    void reset();
-
-    void setParameters(const MemoryDelayParameters& params);
-
-    void processBlock(const float* const* input, float* const* output, int numSamples);
-
-    const InspectState& getInspectState() const;
-
-    int getMaxSamples() const;
-    int getWriteIndex() const;
-    float debugGetMemorySample(int channel, int index) const;
-
-private:
-    float applyBank(float sample, float& filterState, const ModifierBank& bank) const;
-    float readInterpolated(const std::vector<float>& buffer, double position) const;
-    double wrapPosition(double position) const;
-
-    double sampleRate_ = 44100.0;
-    int maxSamples_ = 0;
-    int writeIndex_ = 0;
-
-    std::vector<float> bufferL_;
-    std::vector<float> bufferR_;
-
-    MemoryDelayParameters params_{};
-    InspectState inspect_{};
-
-    double sizeSamplesCurrent_ = 0.0;
-    double sizeSamplesTarget_ = 0.0;
-    double sizeSlewPerSample_ = 0.0;
-
-    double scanPhase_ = 0.0;
-
-    float filterStateA_ = 0.0f;
-    float filterStateB_ = 0.0f;
-    float filterStateASecondary_ = 0.0f;
-    float filterStateBSecondary_ = 0.0f;
-};
-
-} // namespace echoform

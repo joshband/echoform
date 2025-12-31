@@ -82,18 +82,18 @@ TokenLookAndFeel::TokenLookAndFeel()
 
 juce::Font TokenLookAndFeel::getLabelFont(juce::Label&)
 {
-    return juce::Font(tokens.fontFamily, tokens.fontSize, juce::Font::plain);
+    return juce::Font(juce::FontOptions(tokens.fontFamily, tokens.fontSize, juce::Font::plain));
 }
 
 juce::Font TokenLookAndFeel::getComboBoxFont(juce::ComboBox&)
 {
-    return juce::Font(tokens.fontFamily, tokens.fontSize, juce::Font::plain);
+    return juce::Font(juce::FontOptions(tokens.fontFamily, tokens.fontSize, juce::Font::plain));
 }
 
 juce::Font TokenLookAndFeel::getTextButtonFont(juce::TextButton&, int buttonHeight)
 {
     const float size = juce::jmin(tokens.fontSizeLarge, static_cast<float>(buttonHeight) * 0.45f);
-    return juce::Font(tokens.fontFamily, size, juce::Font::plain);
+    return juce::Font(juce::FontOptions(tokens.fontFamily, size, juce::Font::plain));
 }
 
 void TokenLookAndFeel::loadTokensFromFile()
@@ -139,14 +139,23 @@ void TokenLookAndFeel::applyTokens()
     setColour(juce::Slider::rotarySliderOutlineColourId, tokens.track);
     setColour(juce::Slider::thumbColourId, tokens.accent);
     setColour(juce::Slider::textBoxTextColourId, tokens.text);
+    setColour(juce::Slider::textBoxBackgroundColourId, tokens.panel);
+    setColour(juce::Slider::textBoxOutlineColourId, tokens.track);
+    setColour(juce::Slider::textBoxHighlightColourId, tokens.accent.withAlpha(0.2f));
     setColour(juce::Label::textColourId, tokens.text);
     setColour(juce::Label::textWhenEditingColourId, tokens.text);
     setColour(juce::ComboBox::backgroundColourId, tokens.panel);
     setColour(juce::ComboBox::textColourId, tokens.text);
     setColour(juce::ComboBox::outlineColourId, tokens.track);
+    setColour(juce::ComboBox::focusedOutlineColourId, tokens.accent);
     setColour(juce::PopupMenu::backgroundColourId, tokens.panel);
     setColour(juce::PopupMenu::textColourId, tokens.text);
     setColour(juce::TextButton::buttonColourId, tokens.panel);
     setColour(juce::TextButton::textColourOffId, tokens.text);
     setColour(juce::TextButton::textColourOnId, tokens.text);
+    setColour(juce::TextButton::buttonOnColourId, tokens.accent);
+    setColour(juce::TextEditor::focusedOutlineColourId, tokens.accent);
+    setColour(juce::TooltipWindow::textColourId, tokens.text);
+    setColour(juce::TooltipWindow::backgroundColourId, tokens.panel);
+    setColour(juce::TooltipWindow::outlineColourId, tokens.track);
 }

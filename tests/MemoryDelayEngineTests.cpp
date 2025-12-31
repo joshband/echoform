@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <vector>
 
 namespace {
 void testWraparoundDsp()
@@ -14,8 +13,9 @@ void testWraparoundDsp()
     engine.setFeedback(0.0f);
     engine.setAutoScanRate(0.0f);
     engine.setScan(1.0f);
+    engine.setScanMode(static_cast<int>(::MemoryDelayEngine::ScanMode::Manual));
     engine.setSpread(0.0f);
-    engine.setTime(1.0f);
+    engine.setSize(1.0f);
     engine.setCharacter(0.0f);
     engine.setMode(static_cast<int>(::MemoryDelayEngine::FeedbackMode::Collect));
 
@@ -47,44 +47,34 @@ void testWraparoundDsp()
     assert(std::abs(lastRight - expectedRight) < 1.0e-5f);
 }
 
-void testWraparoundEchoform()
+void testCollectOverdub()
 {
-    echoform::MemoryDelayEngine engine;
-    engine.prepare(10.0, 16, 1.0);
+    ::MemoryDelayEngine engine;
+    engine.prepare(1.0, 1, 0.1f);
+    engine.setMix(1.0f);
+    engine.setFeedback(0.0f);
+    engine.setScan(0.0f);
+    engine.setScanMode(static_cast<int>(::MemoryDelayEngine::ScanMode::Manual));
+    engine.setSize(0.05f);
+    engine.setMode(static_cast<int>(::MemoryDelayEngine::FeedbackMode::Collect));
 
-    echoform::MemoryDelayParameters params;
-    params.sizeMs = 1000.0f;
-    params.scanMode = echoform::ScanMode::Manual;
-    params.scan = 1.0f;
-    engine.setParameters(params);
+    juce::AudioBuffer<float> buffer(2, 1);
+    buffer.setSample(0, 0, 0.1f);
+    buffer.setSample(1, 0, 0.1f);
 
-    std::vector<float> inputL(25, 0.0f);
-    std::vector<float> inputR(25, 0.0f);
-    for (int i = 0; i < static_cast<int>(inputL.size()); ++i)
-    {
-        inputL[i] = static_cast<float>(i + 1);
-        inputR[i] = static_cast<float>(i + 1) * 2.0f;
-    }
+    engine.processBlock(buffer);
+    const float firstLeft = engine.debugGetMemorySample(0, 0);
 
-    std::vector<float> outputL(inputL.size(), 0.0f);
-    std::vector<float> outputR(inputL.size(), 0.0f);
+    engine.processBlock(buffer);
+    const float secondLeft = engine.debugGetMemorySample(0, 0);
 
-    const float* inputs[2] = { inputL.data(), inputR.data() };
-    float* outputs[2] = { outputL.data(), outputR.data() };
-
-    engine.processBlock(inputs, outputs, static_cast<int>(inputL.size()));
-
-    const int writeIndex = engine.getWriteIndex();
-    const int lastIndex = (writeIndex - 1 + engine.getMaxSamples()) % engine.getMaxSamples();
-
-    assert(engine.debugGetMemorySample(0, lastIndex) == inputL.back());
-    assert(engine.debugGetMemorySample(1, lastIndex) == inputR.back());
+    assert(secondLeft > firstLeft);
 }
 } // namespace
 
 int main()
 {
     testWraparoundDsp();
-    testWraparoundEchoform();
+    testCollectOverdub();
     return 0;
 }

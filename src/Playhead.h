@@ -55,6 +55,23 @@ public:
         return memory->read(channel, delaySamples);
     }
 
+    float readSample(int channel, double sampleRate, float maxDelaySecondsOverride, float spreadSecondsOverride) const
+    {
+        if (memory == nullptr)
+            return 0.0f;
+
+        float totalDelaySeconds = offsetNormalized * maxDelaySecondsOverride + spreadSecondsOverride;
+        if (totalDelaySeconds < 0.0f)
+            totalDelaySeconds = 0.0f;
+
+        float delaySamples = totalDelaySeconds * static_cast<float>(sampleRate);
+        const float maxSamples = static_cast<float>(memory->getBufferSize());
+        if (delaySamples > maxSamples - 1.0f)
+            delaySamples = maxSamples - 1.0f;
+
+        return memory->read(channel, delaySamples);
+    }
+
 private:
     const MemoryBuffer* memory { nullptr };
     float offsetNormalized { 0.0f };

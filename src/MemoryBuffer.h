@@ -36,6 +36,12 @@ public:
         writePos = 0;
     }
 
+    void clear()
+    {
+        buffer.clear();
+        writePos = 0;
+    }
+
     /** Writes a block of input samples into the buffer.  The input
         buffer must have at least two channels.  Only the first two
         channels are recorded. */

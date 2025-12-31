@@ -20,8 +20,15 @@ public:
         intensity = juce::jlimit(0.0f, 1.0f, newIntensity);
     }
 
+    virtual void setBipolar(float newValue)
+    {
+        bipolar = juce::jlimit(-1.0f, 1.0f, newValue);
+        setIntensity(std::abs(bipolar));
+    }
+
 protected:
     float intensity { 0.0f };
+    float bipolar { 0.0f };
 };
 
 class LowPassModifier final : public Modifier
@@ -45,6 +52,12 @@ public:
         updateCoefficient();
     }
 
+    void setBipolar(float newValue) override
+    {
+        Modifier::setBipolar(newValue);
+        updateCoefficient();
+    }
+
     float processSample(float input, int channel, RandomGenerator&) override
     {
         if (intensity <= 0.0001f)
@@ -52,7 +65,12 @@ public:
 
         float output = (1.0f - coefficient) * input + coefficient * state[static_cast<size_t>(channel)];
         state[static_cast<size_t>(channel)] = output;
-        return output;
+
+        if (bipolar >= 0.0f)
+            return output;
+
+        const float brighten = input + (input - output) * intensity;
+        return brighten;
     }
 
 private:
@@ -151,6 +169,12 @@ public:
         updateParameters();
     }
 
+    void setBipolar(float newValue) override
+    {
+        Modifier::setBipolar(newValue);
+        updateParameters();
+    }
+
     float processSample(float input, int channel, RandomGenerator&) override
     {
         if (intensity <= 0.0001f)
@@ -160,7 +184,9 @@ public:
         {
             const float wow = std::sin(wowPhase);
             const float flutter = std::sin(flutterPhase);
-            const float modMs = (wow * 0.7f + flutter * 0.3f) * depthMs;
+            const float wowWeight = (bipolar >= 0.0f) ? 0.7f : 0.3f;
+            const float flutterWeight = 1.0f - wowWeight;
+            const float modMs = (wow * wowWeight + flutter * flutterWeight) * depthMs;
             currentDelaySamples = (baseDelayMs + modMs) * static_cast<float>(sampleRate) / 1000.0f;
         }
 
@@ -184,8 +210,8 @@ public:
 private:
     void updateParameters()
     {
-        const float wowRate = juce::jmap(intensity, 0.05f, 0.6f);
-        const float flutterRate = juce::jmap(intensity, 1.8f, 6.5f);
+        const float wowRate = juce::jmap(intensity, 0.05f, (bipolar >= 0.0f) ? 0.6f : 0.4f);
+        const float flutterRate = juce::jmap(intensity, (bipolar >= 0.0f) ? 1.8f : 2.4f, 6.5f);
         depthMs = juce::jmap(intensity, 0.0f, 3.5f);
         baseDelayMs = 4.0f + depthMs;
         wowPhaseStep = juce::MathConstants<float>::twoPi * wowRate / static_cast<float>(sampleRate);
@@ -234,7 +260,13 @@ public:
             if (driftSamplesRemaining <= 0)
             {
                 const float depthMs = juce::jmap(intensity, 0.0f, 2.2f);
-                driftTargetMs = random.nextFloatSigned() * depthMs;
+                const float randomValue = std::abs(random.nextFloatSigned());
+                if (bipolar > 0.05f)
+                    driftTargetMs = randomValue * depthMs;
+                else if (bipolar < -0.05f)
+                    driftTargetMs = -randomValue * depthMs;
+                else
+                    driftTargetMs = random.nextFloatSigned() * depthMs;
                 const int rampSamples = juce::jmax(1, static_cast<int>(sampleRate * 0.6f));
                 driftStepMs = (driftTargetMs - driftCurrentMs) / static_cast<float>(rampSamples);
                 driftSamplesRemaining = rampSamples;
@@ -291,11 +323,24 @@ public:
         {
             if (dropoutSamplesRemaining <= 0)
             {
-                const float probability = juce::jmap(intensity, 0.0f, 0.0006f);
+                float probability = juce::jmap(intensity, 0.0f, 0.0006f);
+                float minGain = 0.2f;
+                if (bipolar < 0.0f)
+                {
+                    probability *= 1.4f;
+                    minGain = 0.5f;
+                }
+                else if (bipolar > 0.0f)
+                {
+                    probability *= 0.8f;
+                    minGain = 0.2f;
+                }
+
+                probability = juce::jlimit(0.0f, 1.0f, probability);
                 if (random.nextFloat01() < probability)
                 {
                     dropoutSamplesRemaining = juce::jmax(1, static_cast<int>(sampleRate * random.nextFloatRange(0.01f, 0.08f)));
-                    dropoutGain = juce::jmap(intensity, 1.0f, 0.2f);
+                    dropoutGain = juce::jmap(intensity, 1.0f, minGain);
                 }
             }
         }
@@ -335,28 +380,51 @@ public:
         dropout.reset();
     }
 
-    void setCharacter(float character)
+    void setCharacter(float newCharacter)
     {
-        character = juce::jlimit(0.0f, 1.0f, character);
-        lowPass.setIntensity(character * 0.9f);
-        pitchDrift.setIntensity(character * 0.6f);
-        wowFlutter.setIntensity(character);
-        dropout.setIntensity(character * character);
+        character = juce::jlimit(0.0f, 1.0f, newCharacter);
+        applySettings();
+    }
+
+    void setModValues(float newMod1, float newMod2, float newMod3)
+    {
+        mod1 = juce::jlimit(-1.0f, 1.0f, newMod1);
+        mod2 = juce::jlimit(-1.0f, 1.0f, newMod2);
+        mod3 = juce::jlimit(-1.0f, 1.0f, newMod3);
+        applySettings();
     }
 
     float processSample(float input, int channel, RandomGenerator& random)
     {
         float output = input;
-        output = lowPass.processSample(output, channel, random);
-        output = pitchDrift.processSample(output, channel, random);
         output = wowFlutter.processSample(output, channel, random);
         output = dropout.processSample(output, channel, random);
+        output = lowPass.processSample(output, channel, random);
+        output = pitchDrift.processSample(output, channel, random);
         return output;
     }
 
 private:
+    void applySettings()
+    {
+        const float characterBoost = character * 0.35f;
+        const float sign1 = (mod1 >= 0.0f) ? 1.0f : -1.0f;
+        const float sign2 = (mod2 >= 0.0f) ? 1.0f : -1.0f;
+        const float sign3 = (mod3 >= 0.0f) ? 1.0f : -1.0f;
+        const float driftBoost = character * 0.15f;
+
+        wowFlutter.setBipolar(juce::jlimit(-1.0f, 1.0f, mod1 + sign1 * characterBoost));
+        dropout.setBipolar(juce::jlimit(-1.0f, 1.0f, mod2 + sign2 * characterBoost));
+        lowPass.setBipolar(juce::jlimit(-1.0f, 1.0f, mod3 + sign3 * characterBoost));
+        pitchDrift.setBipolar(juce::jlimit(-1.0f, 1.0f, mod1 * 0.3f + sign1 * driftBoost));
+    }
+
     LowPassModifier lowPass;
     PitchDriftModifier pitchDrift;
     WowFlutterModifier wowFlutter;
     DropoutModifier dropout;
+    float mod1 { 0.0f };
+    float mod2 { 0.0f };
+    float mod3 { 0.0f };
+    float character { 0.0f };
 };
