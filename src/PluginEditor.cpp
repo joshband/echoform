@@ -129,6 +129,8 @@ public:
         const float delta = static_cast<float>(dragStartY_ - event.getPosition().getY()) / 150.0f;
         const float nextValue = juce::jlimit(0.0f, 1.0f, dragStartValue_ + delta);
         parameter_->setValueNotifyingHost(nextValue);
+        normalizedValue_.store(nextValue);
+        repaint();
     }
 
     void mouseUp(const juce::MouseEvent&) override
