@@ -1,10 +1,9 @@
 #pragma once
 
 #include <string>
+#include "ComponentSpec.h"
 
 namespace ui_runtime {
-
-struct ComponentSpec;
 
 class ComponentSpecLoader {
 public:
