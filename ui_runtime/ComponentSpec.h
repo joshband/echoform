@@ -28,7 +28,7 @@ struct ComponentSpec {
     std::string category;
     std::vector<std::string> hierarchy;
     std::map<std::string, std::string> assets;
-    LayerSpec layers;
+    std::vector<LayerSpec> layers;
     InteractionSpec interaction;
     MotionSpec motion;
     std::map<std::string, std::string> tokens;
