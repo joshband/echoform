@@ -15,7 +15,7 @@ This document defines the UI contract for Echoform parameters exposed via `creat
 | `character` | Character | Continuous | 0.0–1.0 (normalized) | 0.0 | Supported (APVTS parameter) | Medium | Rotary knob/slider | Medium |
 | `stereoMode` | Stereo Mode | Enum | Independent / Linked / Cross | Independent (index 0) | Supported (APVTS parameter) | Low | Combo box / segmented control | Medium |
 | `mode` | Mode | Enum | Collect / Feed / Closed | Feed (index 1) | Supported (APVTS parameter) | Medium | Combo box / segmented control | Medium |
-| `randomSeed` | Random Seed | Continuous | 0–65535 (integer) | 1 | Supported (APVTS parameter) | Low | Numeric slider/field | Low |
+| `randomSeed` | Random Seed | Integer/Discrete | 0–65535 (integer) | 1 | Supported (APVTS parameter) | Low | Numeric slider/field | Low |
 
 ## Notes
 
