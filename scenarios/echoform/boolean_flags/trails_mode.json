@@ -1,0 +1,128 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_trails_mode",
+  "name": "Echoform Trails - Bypass with Tail Decay",
+  "category": "delay_reverb",
+  "description": "Validates trails mode allows effect tail to decay naturally when bypassed. Tests bypass behavior with trailing wet signal.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Tests trails mode: bypass with wet tail decay (requires Bypassed=1.0, Trails=1.0)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.6,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {
+    "Trails": 1.0,
+    "Bypassed": 1.0,
+    "Mix": 0.7,
+    "Feedback": 0.6,
+    "Size": 0.167,
+    "Feedback Mode": 0.5
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Full trails response (bypassed with tail)"
+    },
+    "early_tail": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 1.0,
+      "description": "Early tail reflections"
+    },
+    "late_tail": {
+      "type": "time_range",
+      "start_seconds": 1.0,
+      "end_seconds": 4.0,
+      "description": "Late tail decay"
+    }
+  },
+
+  "expected_invariants": {
+    "has_wet_tail": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -60.0
+      },
+      "severity": "hard_fail",
+      "description": "Wet tail should be present despite bypass (trails enabled)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Bypass + trails should not clip"
+    },
+    "natural_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "late_tail",
+      "threshold": {
+        "max_upward_steps": 100,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Tail should decay naturally (feedback decaying without new input)"
+    },
+    "early_reflections": {
+      "metric": "signal_present",
+      "window": "early_tail",
+      "threshold": {
+        "min_rms_db": -50.0
+      },
+      "severity": "soft_warn",
+      "description": "Early reflections should be strong (feedback active at bypass moment)"
+    },
+    "late_decay": {
+      "metric": "signal_present",
+      "window": "late_tail",
+      "threshold": {
+        "min_rms_db": -70.0
+      },
+      "severity": "soft_warn",
+      "description": "Late tail should be quieter (natural decay)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_trails_mode",
+      "capability_class": "trails_bypass_with_tail"
+    }
+  },
+
+  "use_cases": [
+    "Verify trails mode allows wet tail during bypass",
+    "Test natural tail decay without new input",
+    "Validate bypass behavior (dry passthrough + wet tail)",
+    "Ensure feedback continues decaying when bypassed"
+  ],
+
+  "pass_criteria": "Bypassed with natural wet tail decay, no new input processing",
+
+  "example_failures": [
+    "Silent output → trails not working, immediate cutoff",
+    "Sustained energy → new input being processed (not bypassed)",
+    "No decay → feedback not decaying naturally",
+    "Dry signal absent → bypass passthrough not working"
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_wipe_mode",
+  "name": "Echoform Wipe Mode - Wet Only Output",
+  "category": "delay_reverb",
+  "description": "Validates wipe mode removes dry signal and stops buffer writing. Output should be wet-only without feeding new content to memory.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests wipe mode: wet-only output, no buffer write"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {
+    "Wipe": 1.0,
+    "Mix": 0.8,
+    "Feedback": 0.6,
+    "Size": 0.083,
+    "Feedback Mode": 0.5,
+    "Always Record": 0.0
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full wipe mode response"
+    },
+    "initial_impulse": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 0.1,
+      "description": "Initial impulse region"
+    },
+    "decay_tail": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 3.0,
+      "description": "Decay tail after impulse"
+    }
+  },
+
+  "expected_invariants": {
+    "has_output": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -60.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should have wet signal from memory"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Wet-only output should not clip"
+    },
+    "short_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "decay_tail",
+      "threshold": {
+        "max_upward_steps": 50,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Memory should decay without new writes (wipe stops buffer writing)"
+    },
+    "low_rms_tail": {
+      "metric": "signal_present",
+      "window": "decay_tail",
+      "threshold": {
+        "min_rms_db": -80.0
+      },
+      "severity": "soft_warn",
+      "description": "Tail should be quiet since no new content written to buffer"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_wipe_mode",
+      "capability_class": "wipe_mode"
+    }
+  },
+
+  "use_cases": [
+    "Verify wipe mode outputs wet-only signal",
+    "Test buffer write prevention (wipeEnabled stops memory updates)",
+    "Validate dry signal removal",
+    "Ensure no new content recorded during wipe"
+  ],
+
+  "pass_criteria": "Wet-only output with no dry signal, memory decays without new writes",
+
+  "example_failures": [
+    "Dry signal present → wipe not removing dry",
+    "Long sustained tail → buffer still being written",
+    "Silent output → wipe blocking all output"
+  ]
+}

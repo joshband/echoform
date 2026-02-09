@@ -1,0 +1,140 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_tape_window_sweep",
+  "name": "Echoform Tape Mode - Window Size Scaling",
+  "category": "delay_reverb",
+  "description": "Validates tape window parameter (0-30s range) affects jump behavior - larger windows = larger jump distances",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY", "LOOPER"],
+    "required_behaviors": ["STATEFUL", "STOCHASTIC"],
+    "excluded_behaviors": [],
+    "notes": "Tests tape window size parameter (tapeWindowSeconds: 0.0-30.0s)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "logarithmic",
+    "parameters": {
+      "start_freq_hz": 50.0,
+      "end_freq_hz": 2000.0,
+      "duration_seconds": 20.0,
+      "amplitude": 0.3
+    }
+  },
+
+  "parameter_variations": {
+    "Tape Mode": 1.0,
+    "Tape Window Seconds": 0.5,
+    "Random Seed": 0.0865
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 20.0,
+      "description": "Full response - captures behavior with 15s window (0.5 normalized × 30s max)"
+    },
+    "initial_hold": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Initial hold period before first jump"
+    },
+    "active_jumping": {
+      "type": "time_range",
+      "start_seconds": 8.0,
+      "end_seconds": 16.0,
+      "description": "Active jumping phase - multiple jump cycles"
+    }
+  },
+
+  "expected_invariants": {
+    "has_signal": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -60.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should have audible energy"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "spectral_variation": {
+      "metric": "spectral_centroid",
+      "window": "active_jumping",
+      "threshold": {
+        "min": 100.0,
+        "max": 5000.0
+      },
+      "severity": "soft_warn",
+      "description": "Spectral centroid should vary as tape jumps through different positions in sweep"
+    },
+    "moderate_variance": {
+      "metric": "rms_variance",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.0005,
+        "max": 0.4
+      },
+      "severity": "soft_warn",
+      "description": "RMS variance should indicate stochastic behavior (larger window = more variation possible)"
+    },
+    "smooth_slew": {
+      "metric": "discontinuity_count",
+      "window": "full_response",
+      "threshold": {
+        "max_count": 250,
+        "detection_threshold_db": -30.0
+      },
+      "severity": "soft_warn",
+      "description": "0.25s slew should create smooth transitions despite larger window"
+    },
+    "feedback_stability": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_response",
+      "threshold": {
+        "max_upward_steps": 500,
+        "upward_step_db_max": 3.0
+      },
+      "severity": "soft_warn",
+      "description": "Tape mode uses fixed 0.65 feedback - should be stable"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine_sweep.logarithmic",
+      "scenario_id": "echoform_tape_window_sweep",
+      "capability_class": "tape_mode_window_scaling"
+    }
+  },
+
+  "use_cases": [
+    "Verify tape window parameter affects jump range",
+    "Test window size scaling (0-30s max)",
+    "Validate jump ratios within window (near: 0.7-1.0×, deep: 0.25-0.9×)",
+    "Ensure larger windows create larger absolute jump distances",
+    "Check slew time remains constant (0.25s) regardless of window size"
+  ],
+
+  "pass_criteria": "Output shows stochastic jumping behavior with spectral variation, smooth transitions, stable feedback, and deterministic operation with fixed seed",
+
+  "example_failures": [
+    "No spectral variation → jumps not reaching different tape positions",
+    "Excessive discontinuities → slew not scaling correctly",
+    "Window size not affecting behavior → parameter not applied",
+    "Unstable feedback → fixed 0.65 feedback not working"
+  ]
+}

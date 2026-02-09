@@ -1,0 +1,114 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_dry_kill",
+  "name": "Echoform Dry Kill - Wet Only Mix",
+  "category": "delay_reverb",
+  "description": "Validates dry kill removes dry signal from output while continuing normal buffer operation (unlike wipe). Buffer should continue writing.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Tests dry kill: removes dry signal but maintains buffer writes"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.4,
+      "duration_seconds": 2.5
+    }
+  },
+
+  "parameter_variations": {
+    "Dry Kill": 1.0,
+    "Mix": 0.5,
+    "Feedback": 0.5,
+    "Size": 0.083,
+    "Feedback Mode": 0.5,
+    "Always Record": 1.0
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.5,
+      "description": "Full dry kill response"
+    },
+    "steady_state": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 2.0,
+      "description": "Steady state with feedback active"
+    }
+  },
+
+  "expected_invariants": {
+    "wet_signal_present": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -55.0
+      },
+      "severity": "hard_fail",
+      "description": "Wet signal should be present (dry killed but wet active)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Wet-only output should not clip"
+    },
+    "feedback_active": {
+      "metric": "rms_variance",
+      "window": "steady_state",
+      "threshold": {
+        "min": 0.001,
+        "max": 0.5
+      },
+      "severity": "soft_warn",
+      "description": "Feedback should create temporal variation (buffer is being written)"
+    },
+    "sustained_energy": {
+      "metric": "monotonic_tail_decay",
+      "window": "steady_state",
+      "threshold": {
+        "max_upward_steps": 500,
+        "upward_step_db_max": 3.0
+      },
+      "severity": "soft_warn",
+      "description": "Energy should be sustained by feedback (unlike wipe, buffer is active)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "white_noise.continuous",
+      "scenario_id": "echoform_dry_kill",
+      "capability_class": "dry_kill_mode"
+    }
+  },
+
+  "use_cases": [
+    "Verify dry kill removes dry signal from mix",
+    "Test buffer continues writing (unlike wipe mode)",
+    "Validate feedback remains active with dry kill",
+    "Ensure wet-only output without stopping DSP"
+  ],
+
+  "pass_criteria": "Wet-only output with active feedback and buffer writing",
+
+  "example_failures": [
+    "Dry signal present → dry kill not working",
+    "Silent output → wet signal blocked",
+    "No feedback → buffer not being written",
+    "Behaves like wipe → confusion between dry kill and wipe"
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_latch_mode",
+  "name": "Echoform Latch - Freeze Playhead Position",
+  "category": "delay_reverb",
+  "description": "Validates latch mode freezes playhead at current offset and stops buffer writing. Playback loops frozen position.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY", "LOOPER"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests latch mode: frozen playhead offset, no buffer write"
+  },
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "linear",
+    "parameters": {
+      "start_freq_hz": 200.0,
+      "end_freq_hz": 800.0,
+      "duration_seconds": 3.0,
+      "amplitude": 0.5
+    }
+  },
+
+  "parameter_variations": {
+    "Latch": 1.0,
+    "Mix": 0.7,
+    "Scan": 0.5,
+    "Feedback": 0.4,
+    "Size": 0.083,
+    "Feedback Mode": 0.5
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full latch mode response"
+    },
+    "latched_period": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 2.5,
+      "description": "Period with latched playhead"
+    }
+  },
+
+  "expected_invariants": {
+    "has_output": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -55.0
+      },
+      "severity": "hard_fail",
+      "description": "Latched playback should produce output"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Latched output should not clip"
+    },
+    "spectral_stability": {
+      "metric": "spectral_centroid",
+      "window": "latched_period",
+      "threshold": {
+        "min": 100.0,
+        "max": 5000.0
+      },
+      "severity": "soft_warn",
+      "description": "Spectral content should be stable (frozen playhead position)"
+    },
+    "low_variance": {
+      "metric": "rms_variance",
+      "window": "latched_period",
+      "threshold": {
+        "min": 0.0,
+        "max": 0.3
+      },
+      "severity": "soft_warn",
+      "description": "Low variance expected (playhead frozen, minimal scan movement)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine_sweep.linear",
+      "scenario_id": "echoform_latch_mode",
+      "capability_class": "latch_frozen_playhead"
+    }
+  },
+
+  "use_cases": [
+    "Verify latch freezes playhead offset",
+    "Test buffer write prevention (latch stops recording)",
+    "Validate frozen position playback",
+    "Ensure offset captured at latch enable moment"
+  ],
+
+  "pass_criteria": "Frozen playhead output with no new buffer writes, stable spectral content",
+
+  "example_failures": [
+    "Spectral content changes → playhead not frozen",
+    "High variance → scan still modulating",
+    "Silent output → latch blocking playback",
+    "New input appears → buffer still being written"
+  ]
+}

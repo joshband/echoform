@@ -1,0 +1,130 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_tape_mode_basic",
+  "name": "Echoform Tape Mode - Basic Stochastic Jumping",
+  "category": "delay_reverb",
+  "description": "Validates tape mode stochastic jumping behavior - random jumps within time window every 2-6 seconds with 0.25s slew",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY", "LOOPER"],
+    "required_behaviors": ["STATEFUL", "STOCHASTIC"],
+    "excluded_behaviors": [],
+    "notes": "Tests tape mode stochastic jumping (lines 628-700 in MemoryDelayEngine.h)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "linear",
+    "parameters": {
+      "start_freq_hz": 100.0,
+      "end_freq_hz": 1000.0,
+      "duration_seconds": 15.0,
+      "amplitude": 0.3
+    }
+  },
+
+  "parameter_variations": {
+    "Tape Mode": 1.0,
+    "Tape Window Seconds": 0.1,
+    "Random Seed": 0.0188
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 15.0,
+      "description": "Full response - captures multiple jump cycles (2-6s hold intervals)"
+    },
+    "early_phase": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Early phase - initial hold period"
+    },
+    "mid_phase": {
+      "type": "time_range",
+      "start_seconds": 5.0,
+      "end_seconds": 10.0,
+      "description": "Mid phase - after first jumps"
+    }
+  },
+
+  "expected_invariants": {
+    "has_signal": {
+      "metric": "signal_present",
+      "window": "full_response",
+      "threshold": {
+        "min_rms_db": -60.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should have audible energy (tape playback active)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "temporal_variance": {
+      "metric": "rms_variance",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.001,
+        "max": 0.5
+      },
+      "severity": "soft_warn",
+      "description": "RMS variance should show stochastic jumping behavior (not too stable, not too chaotic)"
+    },
+    "smooth_transitions": {
+      "metric": "discontinuity_count",
+      "window": "full_response",
+      "threshold": {
+        "max_count": 200,
+        "detection_threshold_db": -30.0
+      },
+      "severity": "soft_warn",
+      "description": "Tape jumps should be smooth (0.25s slew) with minimal discontinuities"
+    },
+    "stereo_consistency": {
+      "metric": "stereo_correlation",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.85,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "Tape mode uses linked stereo (both channels should be highly correlated)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine_sweep.linear",
+      "scenario_id": "echoform_tape_mode_basic",
+      "capability_class": "tape_mode_stochastic_jumping"
+    }
+  },
+
+  "use_cases": [
+    "Verify tape mode enables stochastic jumping",
+    "Test random jump selection (near vs deep jumps)",
+    "Validate smooth slew transitions (0.25s)",
+    "Check hold intervals (2-6 seconds)",
+    "Ensure deterministic behavior with fixed seed"
+  ],
+
+  "pass_criteria": "Generates audible output with temporal variance from stochastic jumping, smooth transitions between positions, deterministic with fixed seed",
+
+  "example_failures": [
+    "No variance → jumping disabled or stuck",
+    "Many discontinuities → slew not working (should be 0.25s smooth)",
+    "Silent output → tape mode not recording",
+    "Non-deterministic → seed not applied correctly"
+  ]
+}
