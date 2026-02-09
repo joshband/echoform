@@ -1,0 +1,128 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_feedback_sweep",
+  "name": "Echoform Feedback Parameter - High Regeneration Stability",
+  "category": "delay_reverb",
+  "description": "Validates feedback parameter at high regeneration (0.9) without instability or runaway. Tests near-maximum feedback for stability and controlled decay.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Tests feedback parameter at 0.9 (near-maximum, limit is 0.98)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.3,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {
+    "Feedback": 0.9183,
+    "Mix": 0.7,
+    "Size": 0.167,
+    "Feedback Mode": 0.5,
+    "Scan": 0.1
+  },
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Full high-feedback response (4s decay)"
+    },
+    "early_reflections": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 1.0,
+      "description": "Early reflections (first 1s)"
+    },
+    "late_tail": {
+      "type": "time_range",
+      "start_seconds": 1.5,
+      "end_seconds": 3.5,
+      "description": "Late tail (1.5-3.5s, should still be audible at 0.9 feedback)"
+    }
+  },
+
+  "expected_invariants": {
+    "sustained_energy": {
+      "metric": "signal_present",
+      "window": "late_tail",
+      "threshold": {
+        "min_rms_db": -60.0
+      },
+      "severity": "hard_fail",
+      "description": "High feedback (0.9) should sustain energy for several seconds"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "High feedback should not cause runaway/clipping"
+    },
+    "controlled_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_response",
+      "threshold": {
+        "max_upward_steps": 200,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Feedback should decay in a controlled manner (no oscillation/runaway)"
+    },
+    "early_strong": {
+      "metric": "signal_present",
+      "window": "early_reflections",
+      "threshold": {
+        "min_rms_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Early reflections should be strong with high feedback"
+    },
+    "stable_feedback": {
+      "metric": "rms_variance",
+      "window": "late_tail",
+      "threshold": {
+        "min": 0.0001,
+        "max": 0.3
+      },
+      "severity": "soft_warn",
+      "description": "Late tail should have low variance (stable decay, not chaotic)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_feedback_sweep",
+      "capability_class": "high_feedback_stability"
+    }
+  },
+
+  "use_cases": [
+    "Verify feedback parameter at near-maximum (0.9)",
+    "Test stability at high regeneration (no runaway)",
+    "Validate controlled decay without oscillation",
+    "Ensure long sustain without clipping"
+  ],
+
+  "pass_criteria": "Sustained energy over 5s with controlled decay, no clipping or instability",
+
+  "example_failures": [
+    "Clipping → runaway feedback",
+    "Early cutoff → feedback parameter not working",
+    "Oscillation → unstable feedback loop",
+    "Excessive variance → chaotic decay"
+  ]
+}
