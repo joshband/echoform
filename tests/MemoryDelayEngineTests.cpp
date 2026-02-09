@@ -1,3 +1,16 @@
+// ============================================================================
+// DEPRECATED: These tests have been migrated to the QA harness
+//
+// This file is kept for reference and backward compatibility only.
+// New tests should be added as JSON scenarios in scenarios/echoform/
+//
+// Migration status:
+// - testWraparoundDsp()   → scenarios/echoform/core/buffer_wraparound.json
+// - testCollectOverdub()  → scenarios/echoform/feedback/collect_mode_overdub.json
+//
+// See: docs/echoform_qa_catalog.md for complete QA infrastructure details
+// ============================================================================
+
 #include <JuceHeader.h>
 #include "MemoryDelayEngine.h"
 
