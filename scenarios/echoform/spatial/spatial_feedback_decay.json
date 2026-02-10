@@ -1,0 +1,105 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_spatial_feedback_decay",
+  "name": "Spatial Feedback Decay with Room Simulation",
+  "category": "delay_reverb",
+  "description": "Validates that echoform feedback interacts properly with room acoustics, creating natural spatial decay. Tests stereo imaging and ITD/ILD metrics with room simulation.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests feedback + room acoustics spatial interaction"
+  },
+
+  "stimulus": {
+    "stimulus_id": "room_simulation",
+    "stimulus_variant": "preset",
+    "parameters": {
+      "preset": "medium",
+      "input": {
+        "type": "piano_model",
+        "frequency_hz": 440.0,
+        "velocity": 0.7,
+        "duration_seconds": 3.0
+      }
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_decay": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Complete spatial feedback decay"
+    }
+  },
+
+  "expected_invariants": {
+    "spatial_output": {
+      "metric": "rms_energy",
+      "window": "full_decay",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Room + feedback should produce sustained output"
+    },
+    "stereo_imaging": {
+      "metric": "ild_max_db",
+      "window": "full_decay",
+      "threshold": {
+        "min": 0.5,
+        "max": 15.0
+      },
+      "severity": "soft_warn",
+      "description": "Room should create realistic ILD"
+    },
+    "stable_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_decay",
+      "threshold": {
+        "max_upward_steps": 200,
+        "upward_step_db_max": 3.0
+      },
+      "severity": "soft_warn",
+      "description": "Feedback + room should decay smoothly"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_decay",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with spatial processing"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "room_simulation.preset.medium",
+      "scenario_id": "echoform_spatial_feedback_decay",
+      "capability_class": "spatial_feedback"
+    }
+  },
+
+  "use_cases": [
+    "Verify echoform feedback + room interaction",
+    "Test spatial decay characteristics",
+    "Validate stereo imaging with room acoustics",
+    "Ensure realistic spatial feedback"
+  ],
+
+  "pass_criteria": "Creates natural spatial feedback decay with realistic stereo imaging",
+
+  "example_failures": [
+    "Mono output → Room simulation not working",
+    "Unstable feedback → Room + delay interaction issue",
+    "Low ILD → Spatial imaging broken"
+  ]
+}

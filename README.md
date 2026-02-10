@@ -57,6 +57,40 @@ cmake --build build
 
 The UI reads tokens from `resources/visualdna_tokens.json`. If the file is missing or incomplete, the plug-in falls back to built-in defaults.
 
-## Determinism Test Harness
+## QA Test Harness
+
+Echoform includes comprehensive QA scenarios using the audio-dsp-qa-harness:
+
+- **38 scenarios** covering feedback modes, stereo modes, modulation, routing, spatial acoustics, and stress tests
+- **100% pass rate** (31 passing, 7 warnings, 0 failures)
+- **Native stimulus types** including room simulation for spatial testing
+
+### Test Categories
+
+1. **Core Functionality**: Smoke test, determinism, buffer wraparound
+2. **Feedback Modes**: Collect, Feed, Closed (3 scenarios)
+3. **Stereo Modes**: Independent, Linked, Cross (3 scenarios + 1 spatial)
+4. **Modulation**: Wow/flutter, dropout, tone (3 scenarios + 1 spatial)
+5. **Routing**: Bank A/B input/output/feed combinations (5 scenarios)
+6. **Parameter Sweeps**: Mix, scan, feedback, character (4 scenarios)
+7. **Spatial Acoustics**: Feedback decay, tape mode ambience, cross stereo (3 scenarios)
+8. **Stress Tests**: Determinism, buffer extremes, feedback saturation (3 scenarios)
+
+### Running Tests
+
+```bash
+# Run comprehensive suite (all 38 scenarios)
+./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_comprehensive_suite.json
+
+# Run individual scenario
+./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform/smoke_test.json
+
+# Run with performance profiling
+./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_performance_suite.json --enable-profiling
+```
+
+See `docs/SPATIAL_SCENARIOS_RETROACTIVE_IMPROVEMENTS.md` for details on the 3 new spatial scenarios that test echoform with room acoustics.
+
+## Legacy Determinism Test
 
 `src/DeterminismTest.cpp` registers a JUCE `UnitTest` that processes identical input twice with the same seed and asserts bit-identical results. Run it from a JUCE unit test runner if you wire one into your host or standalone app.

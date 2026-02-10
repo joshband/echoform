@@ -1,0 +1,117 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_tape_mode_hall_ambience",
+  "name": "Tape Mode with Hall Room Ambience",
+  "category": "delay_reverb",
+  "description": "Validates that echoform tape mode (wow/flutter/dropout modulation) combines properly with large hall room simulation. Tests tape-like artifacts in a spatial context.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests tape modulation + hall acoustics"
+  },
+
+  "stimulus": {
+    "stimulus_id": "room_simulation",
+    "stimulus_variant": "preset",
+    "parameters": {
+      "preset": "hall",
+      "input": {
+        "type": "multitone",
+        "variant": "harmonic",
+        "fundamental_hz": 261.63,
+        "num_harmonics": 3,
+        "amplitude": 0.5,
+        "duration_seconds": 4.0
+      }
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_ambience": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Complete hall ambience with tape modulation"
+    }
+  },
+
+  "expected_invariants": {
+    "modulation_present": {
+      "metric": "rms_variance",
+      "window": "full_ambience",
+      "threshold": {
+        "min": 0.003,
+        "max": 0.35
+      },
+      "severity": "hard_fail",
+      "description": "Tape modulation should be audible in hall"
+    },
+    "hall_reverb": {
+      "metric": "rms_energy",
+      "window": "full_ambience",
+      "threshold": {
+        "min": 0.005
+      },
+      "severity": "hard_fail",
+      "description": "Hall reverb should sustain output"
+    },
+    "spatial_correlation": {
+      "metric": "iacc_early",
+      "window": "full_ambience",
+      "threshold": {
+        "min": 0.1,
+        "max": 0.9
+      },
+      "severity": "soft_warn",
+      "description": "Hall should create natural spatial decorrelation"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_ambience",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with tape + hall processing"
+    },
+    "smooth_modulation": {
+      "metric": "discontinuity_count",
+      "window": "full_ambience",
+      "threshold": {
+        "max_count": 4000,
+        "detection_threshold_db": -35.0
+      },
+      "severity": "soft_warn",
+      "description": "Tape modulation should remain smooth in hall"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "room_simulation.preset.hall",
+      "scenario_id": "echoform_tape_mode_hall_ambience",
+      "capability_class": "tape_spatial"
+    }
+  },
+
+  "use_cases": [
+    "Verify tape mode + hall room interaction",
+    "Test wow/flutter in spatial context",
+    "Validate spatial correlation with modulation",
+    "Ensure smooth tape artifacts in large room"
+  ],
+
+  "pass_criteria": "Creates tape-like modulation with natural hall ambience and spatial characteristics",
+
+  "example_failures": [
+    "No modulation → Tape mode not working with room",
+    "Harsh artifacts → Modulation + reverb interaction issue",
+    "High IACC → Spatial decorrelation broken (too correlated)"
+  ]
+}

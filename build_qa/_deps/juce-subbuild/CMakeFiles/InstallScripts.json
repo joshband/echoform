@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/artbox/Documents/Repos/echoform/build_qa/_deps/juce-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

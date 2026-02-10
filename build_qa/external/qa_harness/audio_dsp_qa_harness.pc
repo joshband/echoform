@@ -1,0 +1,9 @@
+prefix=/usr/local
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: audio_dsp_qa_harness
+Description: Standalone QA harness for audio DSP plugins
+Version: 0.1.0
+Libs: -L${libdir} -lqa_core -lqa_runners -lqa_scenario_engine
+Cflags: -I${includedir} -std=c++17

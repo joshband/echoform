@@ -1,0 +1,114 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_cross_stereo_small_room",
+  "name": "Cross Stereo Mode with Small Room Simulation",
+  "category": "delay_reverb",
+  "description": "Validates that echoform cross stereo ping-pong delay combines properly with small room acoustics. Tests cross-channel feedback + room reflections for enhanced spatial imaging.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests cross stereo + small room reflections"
+  },
+
+  "stimulus": {
+    "stimulus_id": "room_simulation",
+    "stimulus_variant": "preset",
+    "parameters": {
+      "preset": "small",
+      "input": {
+        "type": "impulse",
+        "variant": "single",
+        "amplitude": 0.8
+      }
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "pingpong_cycle": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.5,
+      "description": "Ping-pong delay with room reflections"
+    }
+  },
+
+  "expected_invariants": {
+    "pingpong_output": {
+      "metric": "rms_energy",
+      "window": "pingpong_cycle",
+      "threshold": {
+        "min": 0.002
+      },
+      "severity": "hard_fail",
+      "description": "Cross stereo + room should sustain ping-pong"
+    },
+    "stereo_separation": {
+      "metric": "iacc_late",
+      "window": "pingpong_cycle",
+      "threshold": {
+        "min": 0.2,
+        "max": 0.85
+      },
+      "severity": "soft_warn",
+      "description": "Cross routing + room should create distinct channels"
+    },
+    "spatial_width": {
+      "metric": "itd_max_ms",
+      "window": "pingpong_cycle",
+      "threshold": {
+        "min": 0.1,
+        "max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Room should enhance ITD from cross routing"
+    },
+    "stable_feedback": {
+      "metric": "monotonic_tail_decay",
+      "window": "pingpong_cycle",
+      "threshold": {
+        "max_upward_steps": 120,
+        "upward_step_db_max": 2.5
+      },
+      "severity": "soft_warn",
+      "description": "Cross-feedback + room should decay smoothly"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "pingpong_cycle",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with cross + room processing"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "room_simulation.preset.small",
+      "scenario_id": "echoform_cross_stereo_small_room",
+      "capability_class": "cross_spatial"
+    }
+  },
+
+  "use_cases": [
+    "Verify cross stereo + room interaction",
+    "Test ping-pong delay with spatial reflections",
+    "Validate ITD enhancement from room",
+    "Ensure stable cross-feedback in spatial context"
+  ],
+
+  "pass_criteria": "Creates enhanced ping-pong effect with room reflections and strong spatial imaging",
+
+  "example_failures": [
+    "High IACC → Cross routing not working with room (too correlated)",
+    "Low ITD → Room not enhancing spatial width",
+    "Unstable feedback → Cross + room interaction issue"
+  ]
+}

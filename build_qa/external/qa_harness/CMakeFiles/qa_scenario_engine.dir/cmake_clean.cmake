@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/audio_analyzer.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/audio_analyzer.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/baseline_manager.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/baseline_manager.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/effect_type_classifier.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/effect_type_classifier.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/frequency_response_analyzer.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/frequency_response_analyzer.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/invariant_evaluator.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/invariant_evaluator.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/metric_evaluator.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/metric_evaluator.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/metrics_exporter.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/metrics_exporter.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/midi_pattern_validator.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/midi_pattern_validator.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/parallel_test_suite_executor.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/parallel_test_suite_executor.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/preset_scanner.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/preset_scanner.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/scenario_executor.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/scenario_executor.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/scenario_loader.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/scenario_loader.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/spatial_metrics.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/spatial_metrics.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/spectrogram_comparator.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/spectrogram_comparator.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/stimulus_generators.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/stimulus_generators.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/test_suite_executor.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/test_suite_executor.cpp.o.d"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/test_suite_loader.cpp.o"
+  "CMakeFiles/qa_scenario_engine.dir/scenario_engine/test_suite_loader.cpp.o.d"
+  "libqa_scenario_engine.a"
+  "libqa_scenario_engine.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/qa_scenario_engine.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

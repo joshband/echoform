@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist>
+  <dict>
+    <key>CFBundleExecutable</key>
+    <string>Stereo Memory Delay</string>
+    <key>CFBundleIconFile</key>
+    <string></string>
+    <key>CFBundleIdentifier</key>
+    <string>com.YourCompany.StereoMemoryDelay</string>
+    <key>CFBundleName</key>
+    <string>Stereo Memory Delay</string>
+    <key>CFBundleDisplayName</key>
+    <string>Stereo Memory Delay</string>
+    <key>CFBundlePackageType</key>
+    <string>BNDL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.0</string>
+    <key>NSHumanReadableCopyright</key>
+    <string></string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>AudioComponents</key>
+    <array>
+      <dict>
+        <key>name</key>
+        <string>YourCompany: Stereo Memory Delay</string>
+        <key>description</key>
+        <string>Stereo Memory Delay</string>
+        <key>factoryFunction</key>
+        <string>Stereo_Memory_DelayAUFactory</string>
+        <key>manufacturer</key>
+        <string>Juce</string>
+        <key>type</key>
+        <string>aufx</string>
+        <key>subtype</key>
+        <string>SMDL</string>
+        <key>version</key>
+        <integer>256</integer>
+        <key>resourceUsage</key>
+        <dict>
+          <key>network.client</key>
+          <true/>
+          <key>temporary-exception.files.all.read-write</key>
+          <true/>
+        </dict>
+      </dict>
+    </array>
+  </dict>
+</plist>
