@@ -1,0 +1,102 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_wow_flutter",
+  "name": "Wow & Flutter Tape Modulation",
+  "category": "delay_reverb",
+  "description": "Validates that wow/flutter modifiers create tape-like pitch variation without introducing artifacts. Tests MOD1 (wow/flutter) behavior.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests wow/flutter tape modulation (MOD1)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 440.0,
+      "num_harmonics": 1,
+      "amplitude": 0.6,
+      "duration_seconds": 3.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_modulation": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Complete wow/flutter cycle"
+    }
+  },
+
+  "expected_invariants": {
+    "modulation_present": {
+      "metric": "rms_variance",
+      "window": "full_modulation",
+      "threshold": {
+        "min": 0.005,
+        "max": 0.3
+      },
+      "severity": "hard_fail",
+      "description": "Wow/flutter should create audible modulation"
+    },
+    "signal_audible": {
+      "metric": "rms_energy",
+      "window": "full_modulation",
+      "threshold": {
+        "min": -50.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should remain audible"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_modulation",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping from modulation"
+    },
+    "smooth_enough": {
+      "metric": "discontinuity_count",
+      "window": "full_modulation",
+      "threshold": {
+        "max_count": 3000,
+        "detection_threshold_db": -35.0
+      },
+      "severity": "soft_warn",
+      "description": "Allow some texture but no harsh artifacts"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine.continuous",
+      "scenario_id": "echoform_wow_flutter",
+      "capability_class": "wow_flutter_mod"
+    }
+  },
+
+  "use_cases": [
+    "Verify wow/flutter implementation",
+    "Test tape-like modulation",
+    "Ensure smooth pitch variation",
+    "Validate MOD1 behavior"
+  ],
+
+  "pass_criteria": "Creates tape-like wow/flutter without harsh artifacts",
+
+  "example_failures": [
+    "No modulation → MOD1 not working",
+    "Harsh artifacts → Modulation too aggressive",
+    "Clipping → Gain issue with modulation"
+  ]
+}

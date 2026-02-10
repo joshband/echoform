@@ -1,0 +1,87 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_stereo_cross",
+  "name": "Cross Stereo Mode Ping-Pong Effect",
+  "category": "delay_reverb",
+  "description": "Validates that Cross stereo mode creates ping-pong delay effect by routing left feedback to right and vice versa. Tests cross-channel feedback.",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests Cross stereo mode ping-pong behavior"
+  },
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.7,
+      "offset_samples": 0
+    }
+  },
+  "parameter_variations": {},
+  "analysis_windows": {
+    "full_pingpong": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Complete ping-pong cycle"
+    }
+  },
+  "expected_invariants": {
+    "sustained_output": {
+      "metric": "rms_energy",
+      "window": "full_pingpong",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Ping-pong should sustain with feedback"
+    },
+    "stable_feedback": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_pingpong",
+      "threshold": {
+        "max_upward_steps": 150,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Cross-feedback should be stable"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_pingpong",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with cross-feedback"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_stereo_cross",
+      "capability_class": "stereo_cross"
+    }
+  },
+  "use_cases": [
+    "Verify Cross stereo mode",
+    "Test ping-pong delay effect",
+    "Validate cross-channel feedback",
+    "Ensure stereo width"
+  ],
+  "pass_criteria": "Creates ping-pong effect with cross-channel feedback",
+  "example_failures": [
+    "High correlation \u2192 Cross routing broken",
+    "Mono output \u2192 Channels not separated",
+    "No feedback \u2192 Cross-feed not working"
+  ]
+}

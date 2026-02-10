@@ -1,0 +1,90 @@
+{
+  "id": "stress_feedback_saturation_recovery",
+  "name": "Feedback Saturation & Recovery Stress Test",
+  "description": "Tests feedback saturation behavior and recovery. Ramps feedback from 95% → 98% → 50% to validate anti-overflow mechanisms, saturation handling, and graceful recovery from extreme feedback levels.",
+  "effect_type": "delay",
+  "capabilities": {
+    "stateful": true,
+    "sample_rate_dependent": true,
+    "feedback_path": true
+  },
+  "stimulus": {
+    "type": "white_noise",
+    "duration_seconds": 15.0,
+    "amplitude": 0.2
+  },
+  "transport": {
+    "bpm": 120.0,
+    "time_signature_numerator": 4,
+    "time_signature_denominator": 4
+  },
+  "parameter_automation": [
+    {
+      "parameter_name": "feedback",
+      "time_points": [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0],
+      "values": [0.5, 0.95, 0.97, 0.98, 0.98, 0.7, 0.5]
+    },
+    {
+      "parameter_name": "delay_size_ms",
+      "time_points": [0.0],
+      "values": [300.0]
+    },
+    {
+      "parameter_name": "mix",
+      "time_points": [0.0],
+      "values": [1.0]
+    },
+    {
+      "parameter_name": "feedback_mode",
+      "time_points": [0.0],
+      "values": [2.0]
+    }
+  ],
+  "analysis": {
+    "window_start": 0.0,
+    "window_end": 15.0
+  },
+  "invariants": [
+    {
+      "metric": "peak_level",
+      "tier": "A",
+      "threshold_min": -20.0,
+      "threshold_max": 0.1,
+      "description": "Peak level must not exceed 0dBFS — anti-overflow mechanisms must prevent clipping"
+    },
+    {
+      "metric": "rms_energy",
+      "tier": "A",
+      "threshold_min": -60.0,
+      "threshold_max": -10.0,
+      "description": "Signal energy should be elevated during high feedback but not runaway"
+    },
+    {
+      "metric": "discontinuity_count",
+      "tier": "B",
+      "threshold_min": 0.0,
+      "threshold_max": 100.0,
+      "description": "Feedback changes may cause brief discontinuities but should be controlled"
+    },
+    {
+      "metric": "dc_offset",
+      "tier": "A",
+      "threshold_min": -0.05,
+      "threshold_max": 0.05,
+      "description": "DC offset must remain controlled even at extreme feedback levels"
+    },
+    {
+      "metric": "monotonic_tail_decay",
+      "tier": "B",
+      "threshold_min": 0.0,
+      "threshold_max": 1.0,
+      "description": "Tail should decay after feedback reduction (recovery test)"
+    }
+  ],
+  "tags": ["stress_test", "feedback", "saturation", "anti_overflow", "recovery"],
+  "notes": [
+    "This scenario validates that Echoform's anti-overflow mechanisms prevent runaway feedback.",
+    "Expected behavior: Signal level increases with feedback but never clips or explodes.",
+    "Recovery phase (12-15s) validates graceful return to normal operation after extreme feedback."
+  ]
+}

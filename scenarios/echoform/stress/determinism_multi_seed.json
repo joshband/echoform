@@ -1,0 +1,92 @@
+{
+  "scenario_version": "1.0",
+  "id": "stress_determinism_multi_seed",
+  "name": "Stress Test: Tape Mode Determinism (Multi-Seed)",
+  "category": "stress_test",
+  "description": "Test tape mode determinism across multiple runs with the same random seed to ensure reproducibility",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "TIME_VARYING"],
+    "excluded_behaviors": [],
+    "notes": "Tests deterministic behavior of stochastic tape emulation"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full impulse response"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Tape mode should produce output"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping from tape saturation"
+    },
+    "variance_present": {
+      "metric": "rms_variance",
+      "window": "full",
+      "threshold": {
+        "min": 0.00001,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "Tape flutter should create temporal variation"
+    },
+    "stable_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "full",
+      "threshold": {
+        "max_upward_steps": 300,
+        "upward_step_db_max": 5.0
+      },
+      "severity": "soft_warn",
+      "description": "General decay trend despite tape variation"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "stress_determinism_multi_seed",
+      "test_type": "stress_determinism"
+    }
+  },
+
+  "use_cases": [
+    "Verify tape mode produces same output for same seed",
+    "Test random number generator seeding",
+    "Validate deterministic regression testing capability"
+  ],
+
+  "pass_criteria": "Identical output across runs with same seed, controlled variation with different seeds"
+}

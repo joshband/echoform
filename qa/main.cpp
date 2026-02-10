@@ -31,7 +31,7 @@ qa::scenario::QARunnerFactory makeInProcessRunnerFactory()
     };
 }
 
-int runScenario(const std::string& scenarioPath, bool captureBaseline, bool compareBaseline)
+int runScenario(const std::string& scenarioPath, bool captureBaseline, bool compareBaseline, bool enableProfiling)
 {
     std::cout << "Running scenario: " << scenarioPath << "\n";
 
@@ -51,7 +51,7 @@ int runScenario(const std::string& scenarioPath, bool captureBaseline, bool comp
     config.blockSize = 512;
     config.numChannels = 2;
     config.outputDir = "qa_output";
-    config.enableProfiling = false;
+    config.enableProfiling = enableProfiling;
 
     // Baseline configuration
     config.captureBaseline = captureBaseline;
@@ -126,7 +126,7 @@ int runScenario(const std::string& scenarioPath, bool captureBaseline, bool comp
             result.status == qa::scenario::ScenarioResult::Status::WARN) ? 0 : 1;
 }
 
-int runTestSuite(const std::string& suitePath, bool captureBaseline, bool compareBaseline)
+int runTestSuite(const std::string& suitePath, bool captureBaseline, bool compareBaseline, bool enableProfiling)
 {
     std::cout << "Running test suite: " << suitePath << "\n";
 
@@ -149,7 +149,7 @@ int runTestSuite(const std::string& suitePath, bool captureBaseline, bool compar
     config.blockSize = 512;
     config.numChannels = 2;
     config.outputDir = "qa_output";
-    config.enableProfiling = false;
+    config.enableProfiling = enableProfiling;
 
     // Baseline configuration
     config.captureBaseline = captureBaseline;
@@ -199,9 +199,11 @@ void printUsage(const char* programName)
     std::cout << "\nOptions:\n";
     std::cout << "  --capture-baseline                   Capture metric baselines\n";
     std::cout << "  --compare-baseline                   Compare to existing baselines\n";
+    std::cout << "  --enable-profiling                   Enable performance profiling\n";
     std::cout << "\nExamples:\n";
     std::cout << "  " << programName << " suite.json --capture-baseline\n";
     std::cout << "  " << programName << " suite.json --compare-baseline\n";
+    std::cout << "  " << programName << " perf_suite.json --enable-profiling\n";
 }
 
 } // namespace
@@ -219,6 +221,7 @@ int main(int argc, char** argv)
         // Parse optional flags
         bool captureBaseline = false;
         bool compareBaseline = false;
+        bool enableProfiling = false;
         std::string path;
 
         for (int i = 1; i < argc; ++i)
@@ -231,6 +234,10 @@ int main(int argc, char** argv)
             else if (arg == "--compare-baseline")
             {
                 compareBaseline = true;
+            }
+            else if (arg == "--enable-profiling")
+            {
+                enableProfiling = true;
             }
             else if (arg == "--help" || arg == "-h")
             {
@@ -247,16 +254,16 @@ int main(int argc, char** argv)
         {
             // Detect if suite or scenario based on filename
             if (path.find("suite") != std::string::npos)
-                return runTestSuite(path, captureBaseline, compareBaseline);
+                return runTestSuite(path, captureBaseline, compareBaseline, enableProfiling);
             else
-                return runScenario(path, captureBaseline, compareBaseline);
+                return runScenario(path, captureBaseline, compareBaseline, enableProfiling);
         }
         else
         {
             // Default: run smoke test
             const std::string smokeTest = "scenarios/echoform/smoke_test.json";
             std::cout << "No arguments provided, running default smoke test\n";
-            return runScenario(smokeTest, captureBaseline, compareBaseline);
+            return runScenario(smokeTest, captureBaseline, compareBaseline, enableProfiling);
         }
     }
     catch (const std::exception& e)

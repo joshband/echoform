@@ -1,0 +1,101 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_smoke_test",
+  "name": "Echoform Smoke Test",
+  "category": "delay_reverb",
+  "description": "Basic functional validation - impulse response with default settings to verify core DSP functionality",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests basic functionality of Echoform MemoryDelayEngine"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full impulse response"
+    }
+  },
+
+  "expected_invariants": {
+    "has_signal": {
+      "metric": "rms_energy",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should have audible energy (delay/feedback present)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "stable_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_response",
+      "threshold": {
+        "max_upward_steps": 100,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Decay should be generally stable (allow some feedback variation)"
+    },
+    "no_excessive_discontinuities": {
+      "metric": "discontinuity_count",
+      "window": "full_response",
+      "threshold": {
+        "max_count": 5000,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Allows granular/dropout effects but catches severe artifacts"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_smoke_test",
+      "capability_class": "memory_delay_effect"
+    }
+  },
+
+  "use_cases": [
+    "Verify basic DSP functionality",
+    "Test impulse response",
+    "Validate audio I/O",
+    "Check parameter application"
+  ],
+
+  "pass_criteria": "Generates audible output without clipping, shows stable decay pattern",
+
+  "example_failures": [
+    "Silent output → DSP not processing",
+    "Clipping → gain staging issue",
+    "Unstable decay → feedback instability",
+    "Many discontinuities → buffer management issue"
+  ]
+}

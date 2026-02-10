@@ -1,0 +1,11 @@
+{
+  "metrics": {
+    "discontinuity_count": 3999.0,
+    "peak_level": -8.258004188537598,
+    "rms_energy": -16.439285278320313,
+    "rms_variance": 1.9953184329743777e-06
+  },
+  "scenario_id": "echoform_auto_scan_modulation",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

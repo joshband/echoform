@@ -1,9 +1,21 @@
 cmake_minimum_required(VERSION 3.15)
 project(StereoMemoryDelay VERSION 0.1.0)
 
-# JUCE location (modify this path to point to your JUCE installation)
+# JUCE location - use FetchContent to download if local installation not found
 set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../juce")
-add_subdirectory(${JUCE_DIR} JUCE)
+if(EXISTS "${JUCE_DIR}/CMakeLists.txt")
+    add_subdirectory(${JUCE_DIR} JUCE)
+else()
+    message(STATUS "JUCE not found locally, downloading via FetchContent...")
+    include(FetchContent)
+    FetchContent_Declare(
+        JUCE
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG 8.0.4
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(JUCE)
+endif()
 
 # Enable C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -66,4 +78,41 @@ if(ENABLE_TESTS)
     )
     juce_generate_juce_header(MemoryDelayEngineTests)
     add_test(NAME MemoryDelayEngineTests COMMAND MemoryDelayEngineTests)
+endif()
+
+# QA Harness Integration
+option(ENABLE_QA_HARNESS "Build QA harness tests" ON)
+if(ENABLE_QA_HARNESS)
+    # Add harness as subdirectory
+    add_subdirectory(external/qa_harness EXCLUDE_FROM_ALL)
+
+    # Create QA executable
+    juce_add_console_app(echoform_qa
+        PRODUCT_NAME "EchoformQA"
+    )
+
+    target_sources(echoform_qa PRIVATE
+        qa/echoform_adapter.cpp
+        qa/echoform_adapter.h
+        qa/main.cpp
+    )
+
+    juce_generate_juce_header(echoform_qa)
+
+    target_include_directories(echoform_qa PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/qa_harness/core
+    )
+
+    target_link_libraries(echoform_qa PRIVATE
+        qa_core
+        qa_runners
+        qa_scenario_engine
+        juce::juce_audio_basics
+        juce::juce_core
+        juce::juce_dsp
+    )
+
+    # Add CTest integration
+    add_test(NAME echoform_qa COMMAND echoform_qa)
 endif()

@@ -1,0 +1,18 @@
+{
+  "id": "echoform_critical_suite",
+  "name": "Echoform Critical Tests (Fast)",
+  "description": "Essential tests that must pass before release - covers core functionality, stability, and determinism. Run this for quick validation (~30 seconds).",
+  "scenario_ids": [
+    "echoform_smoke_test",
+    "echoform_determinism",
+    "echoform_feed_mode_stability",
+    "echoform_buffer_wraparound",
+    "echoform_zero_latency"
+  ],
+  "stopOnFirstFailure": true,
+  "sharedConfig": {
+    "sample_rate": 48000,
+    "block_size": 512,
+    "output_dir": "qa_output"
+  }
+}

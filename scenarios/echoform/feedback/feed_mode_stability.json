@@ -1,0 +1,90 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_feed_mode_stability",
+  "name": "Feed Mode Feedback Stability",
+  "category": "delay_reverb",
+  "description": "Validates that Feed feedback mode remains stable and doesn't create runaway feedback or energy buildup. Tests feedback loop integrity.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests Feed mode feedback stability with various feedback amounts"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.8,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_decay": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Complete feedback decay cycle"
+    }
+  },
+
+  "expected_invariants": {
+    "feedback_stability": {
+      "metric": "energy_growth",
+      "window": "full_decay",
+      "threshold": {
+        "allow_increase_pct": 5.0
+      },
+      "severity": "hard_fail",
+      "description": "Feedback must not cause runaway energy growth"
+    },
+    "monotonic_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_decay",
+      "threshold": {
+        "max_upward_steps": 150,
+        "upward_step_db_max": 1.5
+      },
+      "severity": "hard_fail",
+      "description": "Feedback should decay monotonically"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_decay",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Feedback loop must not cause clipping"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_feed_mode_stability",
+      "capability_class": "feed_mode"
+    }
+  },
+
+  "use_cases": [
+    "Verify Feed mode stability",
+    "Test feedback loop integrity",
+    "Ensure no runaway feedback",
+    "Validate decay behavior"
+  ],
+
+  "pass_criteria": "Stable feedback decay without energy growth or clipping",
+
+  "example_failures": [
+    "Energy grows → Feedback instability",
+    "Never decays → Feedback at 100%",
+    "Clipping → Gain staging issue"
+  ]
+}

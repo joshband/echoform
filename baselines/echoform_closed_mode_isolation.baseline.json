@@ -1,0 +1,11 @@
+{
+  "metrics": {
+    "energy_growth": 8.02115249633789,
+    "monotonic_tail_decay": 7.0,
+    "peak_level": -10.446200370788574,
+    "rms_energy": -51.337120056152344
+  },
+  "scenario_id": "echoform_closed_mode_isolation",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

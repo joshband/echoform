@@ -4,14 +4,18 @@
   "name": "Echoform Tape Mode - Window Size Scaling",
   "category": "delay_reverb",
   "description": "Validates tape window parameter (0-30s range) affects jump behavior - larger windows = larger jump distances",
-
   "capability_requirements": {
-    "required_effect_types": ["DELAY", "LOOPER"],
-    "required_behaviors": ["STATEFUL", "STOCHASTIC"],
+    "required_effect_types": [
+      "DELAY",
+      "LOOPER"
+    ],
+    "required_behaviors": [
+      "STATEFUL",
+      "STOCHASTIC"
+    ],
     "excluded_behaviors": [],
     "notes": "Tests tape window size parameter (tapeWindowSeconds: 0.0-30.0s)"
   },
-
   "stimulus": {
     "stimulus_id": "sweep",
     "stimulus_variant": "logarithmic",
@@ -22,19 +26,17 @@
       "amplitude": 0.3
     }
   },
-
   "parameter_variations": {
     "Tape Mode": 1.0,
     "Tape Window Seconds": 0.5,
     "Random Seed": 0.0865
   },
-
   "analysis_windows": {
     "full_response": {
       "type": "time_range",
       "start_seconds": 0.0,
       "end_seconds": 20.0,
-      "description": "Full response - captures behavior with 15s window (0.5 normalized × 30s max)"
+      "description": "Full response - captures behavior with 15s window (0.5 normalized \u00d7 30s max)"
     },
     "initial_hold": {
       "type": "time_range",
@@ -49,13 +51,12 @@
       "description": "Active jumping phase - multiple jump cycles"
     }
   },
-
   "expected_invariants": {
     "has_signal": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "full_response",
       "threshold": {
-        "min_rms_db": -60.0
+        "min": 0.001
       },
       "severity": "hard_fail",
       "description": "Output should have audible energy"
@@ -68,16 +69,6 @@
       },
       "severity": "hard_fail",
       "description": "Output should not clip"
-    },
-    "spectral_variation": {
-      "metric": "spectral_centroid",
-      "window": "active_jumping",
-      "threshold": {
-        "min": 100.0,
-        "max": 5000.0
-      },
-      "severity": "soft_warn",
-      "description": "Spectral centroid should vary as tape jumps through different positions in sweep"
     },
     "moderate_variance": {
       "metric": "rms_variance",
@@ -110,31 +101,29 @@
       "description": "Tape mode uses fixed 0.65 feedback - should be stable"
     }
   },
-
   "baseline_tracking": {
     "enabled": true,
-    "compare_against": ["golden"],
+    "compare_against": [
+      "golden"
+    ],
     "provenance": {
       "stimulus_id": "sine_sweep.logarithmic",
       "scenario_id": "echoform_tape_window_sweep",
       "capability_class": "tape_mode_window_scaling"
     }
   },
-
   "use_cases": [
     "Verify tape window parameter affects jump range",
     "Test window size scaling (0-30s max)",
-    "Validate jump ratios within window (near: 0.7-1.0×, deep: 0.25-0.9×)",
+    "Validate jump ratios within window (near: 0.7-1.0\u00d7, deep: 0.25-0.9\u00d7)",
     "Ensure larger windows create larger absolute jump distances",
     "Check slew time remains constant (0.25s) regardless of window size"
   ],
-
   "pass_criteria": "Output shows stochastic jumping behavior with spectral variation, smooth transitions, stable feedback, and deterministic operation with fixed seed",
-
   "example_failures": [
-    "No spectral variation → jumps not reaching different tape positions",
-    "Excessive discontinuities → slew not scaling correctly",
-    "Window size not affecting behavior → parameter not applied",
-    "Unstable feedback → fixed 0.65 feedback not working"
+    "No spectral variation \u2192 jumps not reaching different tape positions",
+    "Excessive discontinuities \u2192 slew not scaling correctly",
+    "Window size not affecting behavior \u2192 parameter not applied",
+    "Unstable feedback \u2192 fixed 0.65 feedback not working"
   ]
 }

@@ -1,0 +1,77 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_stereo_linked",
+  "name": "Linked Stereo Mode Synchronized Processing",
+  "category": "delay_reverb",
+  "description": "Validates that Linked stereo mode synchronizes playhead positions across channels while maintaining stereo image. Tests linked playhead behavior.",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests Linked stereo mode with synchronized playheads"
+  },
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.4,
+      "duration_seconds": 2.5
+    }
+  },
+  "parameter_variations": {},
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.5,
+      "description": "Complete linked processing"
+    }
+  },
+  "expected_invariants": {
+    "both_channels_active": {
+      "metric": "rms_energy",
+      "window": "full_response",
+      "threshold": {
+        "min": -55.0
+      },
+      "severity": "hard_fail",
+      "description": "Both channels should process audio"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with linked processing"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "stimulus_id": "white_noise.stereo_decorrelated",
+      "scenario_id": "echoform_stereo_linked",
+      "capability_class": "stereo_linked"
+    }
+  },
+  "use_cases": [
+    "Verify Linked stereo mode",
+    "Test synchronized playheads",
+    "Ensure stereo image preserved",
+    "Validate linked processing"
+  ],
+  "pass_criteria": "Synchronized processing with maintained stereo image",
+  "example_failures": [
+    "Mono output \u2192 Channels collapsed",
+    "Too independent \u2192 Link not working",
+    "One channel silent \u2192 Sync broken"
+  ]
+}

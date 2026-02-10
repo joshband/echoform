@@ -1,0 +1,108 @@
+{
+  "scenario_version": "1.0",
+  "id": "stress_feedback_saturation_recovery",
+  "name": "Stress Test: Feedback Saturation Recovery",
+  "category": "stress_test",
+  "description": "Test feedback at extreme levels (95-98%) and recovery to safe levels to validate stability and graceful handling",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Tests feedback stability near saturation and recovery behavior"
+  },
+
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 440.0,
+      "num_harmonics": 1,
+      "amplitude": 0.3,
+      "duration_seconds": 5.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Full feedback cycle"
+    },
+    "tail": {
+      "type": "time_range",
+      "start_seconds": 2.0,
+      "end_seconds": 4.5,
+      "description": "Feedback tail region"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Feedback loop should sustain signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Feedback should not cause clipping"
+    },
+    "no_runaway": {
+      "metric": "energy_growth",
+      "window": "tail",
+      "threshold": {
+        "allow_increase_pct": 20.0
+      },
+      "severity": "soft_warn",
+      "description": "Feedback should not cause excessive energy buildup"
+    },
+    "dc_offset_controlled": {
+      "metric": "dc_offset",
+      "window": "tail",
+      "threshold": {
+        "max": 0.01
+      },
+      "severity": "soft_warn",
+      "description": "DC offset should be minimal"
+    },
+    "graceful_recovery": {
+      "metric": "monotonic_tail_decay",
+      "window": "tail",
+      "threshold": {
+        "max_upward_steps": 400,
+        "upward_step_db_max": 4.0
+      },
+      "severity": "soft_warn",
+      "description": "Should recover gracefully from high feedback"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "stress_feedback_saturation_recovery",
+      "test_type": "stress_feedback"
+    }
+  },
+
+  "use_cases": [
+    "Test feedback stability at near-saturation levels",
+    "Validate graceful recovery from extreme feedback",
+    "Ensure no runaway or clipping during feedback ramp"
+  ],
+
+  "pass_criteria": "Stable operation at high feedback, no clipping, graceful recovery when reduced"
+}

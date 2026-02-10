@@ -1,0 +1,17 @@
+{
+  "id": "echoform_stress_suite",
+  "name": "Echoform Stress Test Suite",
+  "description": "Stress tests for Echoform MemoryDelayEngine - validates boundary conditions, extreme parameters, rapid changes, and recovery behavior. 4 scenarios targeting edge cases and stability.",
+  "scenario_ids": [
+    "stress_buffer_size_extremes",
+    "stress_parameter_slew",
+    "stress_determinism_multi_seed",
+    "stress_feedback_saturation_recovery"
+  ],
+  "stopOnFirstFailure": false,
+  "sharedConfig": {
+    "sample_rate": 48000,
+    "block_size": 512,
+    "output_dir": "qa_output"
+  }
+}

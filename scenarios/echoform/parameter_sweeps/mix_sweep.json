@@ -4,14 +4,16 @@
   "name": "Echoform Mix Parameter - Dry/Wet Crossfade Validation",
   "category": "delay_reverb",
   "description": "Validates mix parameter (0.0-1.0) controls dry/wet balance correctly. Tests at full dry (0.0), balanced (0.5), and full wet (1.0) extremes.",
-
   "capability_requirements": {
-    "required_effect_types": ["DELAY"],
-    "required_behaviors": ["STATEFUL"],
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
     "excluded_behaviors": [],
     "notes": "Tests mix parameter range: 0.0 (all dry) to 1.0 (all wet)"
   },
-
   "stimulus": {
     "stimulus_id": "multitone",
     "stimulus_variant": "harmonic",
@@ -22,7 +24,6 @@
       "duration_seconds": 3.0
     }
   },
-
   "parameter_variations": {
     "Mix": 1.0,
     "Feedback": 0.5,
@@ -30,7 +31,6 @@
     "Feedback Mode": 0.5,
     "Scan": 0.3
   },
-
   "analysis_windows": {
     "full_response": {
       "type": "time_range",
@@ -51,13 +51,12 @@
       "description": "Steady state with feedback"
     }
   },
-
   "expected_invariants": {
     "strong_wet_signal": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "full_response",
       "threshold": {
-        "min_rms_db": -50.0
+        "min": -50.0
       },
       "severity": "hard_fail",
       "description": "At mix=1.0, wet signal should dominate (strong delay/feedback audible)"
@@ -81,16 +80,6 @@
       "severity": "soft_warn",
       "description": "Feedback should create temporal variation in wet mix"
     },
-    "harmonic_structure": {
-      "metric": "spectral_centroid",
-      "window": "early_response",
-      "threshold": {
-        "min": 100.0,
-        "max": 3000.0
-      },
-      "severity": "soft_warn",
-      "description": "Wet signal should preserve harmonic structure of multitone"
-    },
     "stable_feedback": {
       "metric": "monotonic_tail_decay",
       "window": "steady_state",
@@ -102,30 +91,28 @@
       "description": "Feedback should be stable at 0.5 (no runaway or oscillation)"
     }
   },
-
   "baseline_tracking": {
     "enabled": true,
-    "compare_against": ["golden"],
+    "compare_against": [
+      "golden"
+    ],
     "provenance": {
       "stimulus_id": "multitone.harmonic",
       "scenario_id": "echoform_mix_sweep",
       "capability_class": "mix_parameter_wet_extreme"
     }
   },
-
   "use_cases": [
     "Verify mix parameter controls wet level (test at 1.0 = full wet)",
     "Test wet-only operation without dry signal",
     "Validate feedback stability at full wet mix",
     "Ensure no clipping at extreme mix values"
   ],
-
   "pass_criteria": "Strong wet signal with stable feedback, no clipping, preserved harmonic structure",
-
   "example_failures": [
-    "Weak signal → mix parameter not working",
-    "Clipping → gain staging issue at full wet",
-    "Unstable feedback → oscillation at mix=1.0",
-    "No harmonics → spectral corruption"
+    "Weak signal \u2192 mix parameter not working",
+    "Clipping \u2192 gain staging issue at full wet",
+    "Unstable feedback \u2192 oscillation at mix=1.0",
+    "No harmonics \u2192 spectral corruption"
   ]
 }

@@ -1,0 +1,99 @@
+{
+  "scenario_version": "1.0",
+  "id": "routing_bank_ab_combination",
+  "name": "Routing: Bank A+B Combination",
+  "category": "routing_modes",
+  "description": "Test combined Bank A (input) + Bank B (feedback) routing with different modifiers active",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL",
+      "TIME_VARYING",
+      "FEEDBACK"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests Bank A=In (wow/flutter) + Bank B=Feed (tone) interaction"
+  },
+  "parameter_variations": {},
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "linear",
+    "parameters": {
+      "start_freq_hz": 100.0,
+      "end_freq_hz": 5000.0,
+      "amplitude": 0.25,
+      "duration_seconds": 2.0
+    }
+  },
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full sweep response"
+    },
+    "steady": {
+      "type": "time_range",
+      "start_seconds": 0.3,
+      "end_seconds": 1.7,
+      "description": "Steady sweep region"
+    }
+  },
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain processed sweep"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Combined modulation should not clip"
+    },
+    "combined_modulation": {
+      "metric": "rms_variance",
+      "window": "steady",
+      "threshold": {
+        "min_variance": 0.0001
+      },
+      "severity": "hard_fail",
+      "description": "Combined Bank A+B modulation should create variation"
+    },
+    "allow_modulation_artifacts": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 100,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Combined modulation may create some artifacts"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "scenario_id": "routing_bank_ab_combination",
+      "routing_mode": "bank_a_input_bank_b_feed"
+    }
+  },
+  "use_cases": [
+    "Verify Bank A + Bank B can operate simultaneously",
+    "Test cross-bank routing interaction",
+    "Validate complex routing configurations"
+  ],
+  "pass_criteria": "Generates output with combined modulation from both banks, no clipping, stable processing"
+}

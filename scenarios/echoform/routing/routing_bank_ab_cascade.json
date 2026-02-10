@@ -1,0 +1,99 @@
+{
+  "scenario_version": "1.0",
+  "id": "routing_bank_ab_cascade",
+  "name": "Bank A → Bank B Cascaded Modifiers",
+  "category": "routing",
+  "description": "Tests cascaded modulation through both Bank A and Bank B. MOD1 in Bank A and MOD2 in Bank B should produce combined modulation effects on the signal.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests cross-bank routing and modifier cascading"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full impulse response with cascaded modulation"
+    }
+  },
+
+  "expected_invariants": {
+    "cascaded_modulation": {
+      "metric": "rms_variance",
+      "window": "full",
+      "threshold": {
+        "min": 0.02
+      },
+      "severity": "soft_warn",
+      "description": "Should show modulation variance from cascaded effects"
+    },
+    "signal_present": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should have energy"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping from cascaded processing"
+    },
+    "no_non_finite": {
+      "metric": "non_finite",
+      "window": "full",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "No NaN/Inf in cascaded output"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "routing_bank_ab_cascade",
+      "capability_class": "cross_bank_routing"
+    }
+  },
+
+  "use_cases": [
+    "Validate Bank A → Bank B signal flow",
+    "Test cascaded modifier interactions",
+    "Verify routing parameter functionality",
+    "Check multi-bank DSP stability"
+  ],
+
+  "pass_criteria": "Cascaded modulation through both banks without artifacts",
+
+  "example_failures": [
+    "No variance → Modifiers not cascading",
+    "Silent output → Routing broken",
+    "Clipping → Gain staging issue in cascade",
+    "NaN/Inf → Cascaded filter instability"
+  ]
+}

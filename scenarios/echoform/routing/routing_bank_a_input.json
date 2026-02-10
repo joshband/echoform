@@ -1,0 +1,99 @@
+{
+  "scenario_version": "1.0",
+  "id": "routing_bank_a_input",
+  "name": "Routing: Bank A Input Path",
+  "category": "routing_modes",
+  "description": "Test Bank A modifiers applied on input path (routingModeA=In) with wow/flutter modulation",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "TIME_VARYING"],
+    "excluded_behaviors": [],
+    "notes": "Tests routing mode A=In with MOD1 (wow/flutter) active"
+  },
+
+  "parameter_variations": {},
+
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 200.0,
+      "num_harmonics": 5,
+      "amplitude": 0.3,
+      "duration_seconds": 2.0
+    }
+  },
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full response"
+    },
+    "steady": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 1.5,
+      "description": "Steady-state region"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain delayed signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "modulation_activity": {
+      "metric": "rms_variance",
+      "window": "steady",
+      "threshold": {
+        "min": 0.0001
+      },
+      "severity": "soft_warn",
+      "description": "Wow/flutter should create RMS variation"
+    },
+    "no_excessive_discontinuities": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 50,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Allow some artifacts from modulation"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "routing_bank_a_input",
+      "routing_mode": "input_path"
+    }
+  },
+
+  "use_cases": [
+    "Verify Bank A routing mode 'In' applies modifiers to input",
+    "Test wow/flutter modulation on input path",
+    "Validate signal routing correctness"
+  ],
+
+  "pass_criteria": "Generates output with wow/flutter modulation, no clipping, stable processing"
+}

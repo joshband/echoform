@@ -1,0 +1,100 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_closed_mode_isolation",
+  "name": "Closed Mode Buffer Isolation",
+  "category": "delay_reverb",
+  "description": "Validates that Closed feedback mode creates an isolated feedback loop that doesn't accept new input after initial recording. Tests buffer isolation behavior.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests Closed mode buffer isolation and self-sustaining loop"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "periodic",
+    "parameters": {
+      "amplitude": 0.5,
+      "period_seconds": 0.5,
+      "num_pulses": 8
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_cycle": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Full cycle with multiple impulses"
+    }
+  },
+
+  "expected_invariants": {
+    "sustained_loop": {
+      "metric": "rms_energy",
+      "window": "full_cycle",
+      "threshold": {
+        "min": -50.0
+      },
+      "severity": "hard_fail",
+      "description": "Closed loop should sustain signal"
+    },
+    "stable_feedback": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_cycle",
+      "threshold": {
+        "max_upward_steps": 200,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Loop should be stable (allow some variation)"
+    },
+    "no_runaway": {
+      "metric": "energy_growth",
+      "window": "full_cycle",
+      "threshold": {
+        "allow_increase_pct": 10.0
+      },
+      "severity": "hard_fail",
+      "description": "Closed loop must not grow energy"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_cycle",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Self-sustaining loop must not clip"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse_train.periodic",
+      "scenario_id": "echoform_closed_mode_isolation",
+      "capability_class": "closed_mode"
+    }
+  },
+
+  "use_cases": [
+    "Verify Closed mode isolation",
+    "Test self-sustaining feedback loop",
+    "Ensure stable loop behavior",
+    "Validate buffer isolation"
+  ],
+
+  "pass_criteria": "Self-sustaining loop remains stable without accepting new input",
+
+  "example_failures": [
+    "Loop dies out → Isolation broken",
+    "Energy grows → Feedback misconfigured",
+    "Unstable → Loop algorithm issue"
+  ]
+}

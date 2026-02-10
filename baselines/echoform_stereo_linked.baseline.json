@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "peak_level": -10.125638961791992,
+    "rms_energy": -18.368675231933594
+  },
+  "scenario_id": "echoform_stereo_linked",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

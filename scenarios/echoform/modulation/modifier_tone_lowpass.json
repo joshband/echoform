@@ -1,0 +1,91 @@
+{
+  "scenario_version": "1.0",
+  "id": "modifier_tone_lowpass",
+  "name": "MOD3 Tone Low-Pass Filter",
+  "category": "modulation",
+  "description": "Tests the MOD3 tone modifier's low-pass filtering effect on delayed signal. Expects high-frequency attenuation when tone is engaged at 80%.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests tone modifier (MOD3) low-pass filtering"
+  },
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "log_sine",
+    "parameters": {
+      "start_freq_hz": 20.0,
+      "end_freq_hz": 20000.0,
+      "duration_seconds": 2.0,
+      "amplitude": 0.5
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full sweep analysis"
+    }
+  },
+
+  "expected_invariants": {
+    "signal_present": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.01
+      },
+      "severity": "hard_fail",
+      "description": "Signal should be present after delay/feedback"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping should occur"
+    },
+    "stable_output": {
+      "metric": "non_finite",
+      "window": "full",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "No NaN/Inf values in output"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sweep.log_sine",
+      "scenario_id": "modifier_tone_lowpass",
+      "capability_class": "tone_modifier"
+    }
+  },
+
+  "use_cases": [
+    "Validate MOD3 tone control",
+    "Test low-pass filtering on delayed signal",
+    "Verify no artifacts from tone shaping",
+    "Check frequency response modification"
+  ],
+
+  "pass_criteria": "Tone modifier affects frequency content without instability or clipping",
+
+  "example_failures": [
+    "No signal → Tone filter broken",
+    "Clipping → Gain compensation needed",
+    "NaN/Inf → Numerical instability in filter"
+  ]
+}

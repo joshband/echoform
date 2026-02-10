@@ -1,0 +1,108 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_buffer_wraparound",
+  "name": "Buffer Wraparound Integrity",
+  "category": "delay_reverb",
+  "description": "Validates that the circular buffer correctly wraps around and preserves sample integrity at boundary conditions. Migrated from MemoryDelayEngineTests::testWraparoundDsp().",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests circular buffer wraparound behavior"
+  },
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "linear",
+    "parameters": {
+      "start_freq_hz": 100.0,
+      "end_freq_hz": 1000.0,
+      "duration_seconds": 2.0,
+      "amplitude": 0.8
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_buffer": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full buffer cycle"
+    },
+    "tail": {
+      "type": "time_range",
+      "start_seconds": 1.5,
+      "end_seconds": 2.0,
+      "description": "Buffer tail after wraparound"
+    }
+  },
+
+  "expected_invariants": {
+    "output_present": {
+      "metric": "rms_energy",
+      "window": "full_buffer",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Buffer should produce output across full cycle"
+    },
+    "no_excessive_discontinuities": {
+      "metric": "discontinuity_count",
+      "window": "tail",
+      "threshold": {
+        "max_count": 1000,
+        "detection_threshold_db": -30.0
+      },
+      "severity": "soft_warn",
+      "description": "Allow granular texture but catch severe wraparound artifacts"
+    },
+    "stable_output": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_buffer",
+      "threshold": {
+        "max_upward_steps": 500,
+        "upward_step_db_max": 3.0
+      },
+      "severity": "soft_warn",
+      "description": "Output should be stable across buffer wrap"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_buffer",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping during wraparound"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine_sweep.linear",
+      "scenario_id": "echoform_buffer_wraparound",
+      "capability_class": "circular_buffer"
+    }
+  },
+
+  "use_cases": [
+    "Validate circular buffer implementation",
+    "Test boundary condition handling",
+    "Ensure no artifacts at buffer wrap point",
+    "Verify sample preservation across wraparound"
+  ],
+
+  "pass_criteria": "No discontinuities or artifacts when buffer wraps around",
+
+  "example_failures": [
+    "Clicks at wrap point → index calculation error",
+    "Silent periods → buffer read/write desync",
+    "Distortion → sample corruption at boundary"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "scenario_version": "1.0",
+  "id": "stress_buffer_size_extremes",
+  "name": "Stress Test: Buffer Size Extremes (Min/Max)",
+  "category": "stress_test",
+  "description": "Test extreme buffer sizes: minimum (50ms via size=0.0) and near-maximum (60s via size=1.0) to validate memory handling and wrapping",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests buffer allocation and wraparound at size extremes"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Full response window"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain delayed signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "no_artifacts": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 100,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Minimal discontinuities expected"
+    },
+    "no_non_finite": {
+      "metric": "non_finite",
+      "window": "full",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "No NaN/Inf values"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "stress_buffer_size_extremes",
+      "test_type": "stress_boundary"
+    }
+  },
+
+  "use_cases": [
+    "Validate buffer allocation at minimum size",
+    "Test wraparound logic at maximum buffer length",
+    "Ensure no memory errors at size boundaries"
+  ],
+
+  "pass_criteria": "Clean output at both min and max buffer sizes, no artifacts or NaN values"
+}

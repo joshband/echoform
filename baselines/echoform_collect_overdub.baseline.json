@@ -1,0 +1,11 @@
+{
+  "metrics": {
+    "discontinuity_count": 1999.0,
+    "energy_growth": 8.52348804473877,
+    "peak_level": -14.799713134765625,
+    "rms_energy": -55.6843376159668
+  },
+  "scenario_id": "echoform_collect_overdub",
+  "timestamp": "2026-02-10T04:53:37Z",
+  "version": "v1.0.0"
+}

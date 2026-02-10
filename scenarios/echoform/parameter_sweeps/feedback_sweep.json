@@ -52,10 +52,10 @@
 
   "expected_invariants": {
     "sustained_energy": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "late_tail",
       "threshold": {
-        "min_rms_db": -60.0
+        "min": 0.001
       },
       "severity": "hard_fail",
       "description": "High feedback (0.9) should sustain energy for several seconds"
@@ -80,10 +80,10 @@
       "description": "Feedback should decay in a controlled manner (no oscillation/runaway)"
     },
     "early_strong": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "early_reflections",
       "threshold": {
-        "min_rms_db": -40.0
+        "min": -40.0
       },
       "severity": "soft_warn",
       "description": "Early reflections should be strong with high feedback"

@@ -1,0 +1,105 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_extreme_feedback",
+  "name": "Extreme Feedback Stability (98%)",
+  "category": "delay_reverb",
+  "description": "Validates stability at maximum feedback (98%) - the effect should remain stable without runaway, explosion, or NaN. Tests edge case feedback behavior.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests maximum feedback stability (98% is the limit)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "long_tail": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 10.0,
+      "description": "Long tail with extreme feedback"
+    },
+    "late_stage": {
+      "type": "time_range",
+      "start_seconds": 5.0,
+      "end_seconds": 10.0,
+      "description": "Late stage - should still be stable"
+    }
+  },
+
+  "expected_invariants": {
+    "no_runaway": {
+      "metric": "energy_growth",
+      "window": "long_tail",
+      "threshold": {
+        "allow_increase_pct": 10.0
+      },
+      "severity": "hard_fail",
+      "description": "Even at 98% feedback, must not grow energy"
+    },
+    "sustained_signal": {
+      "metric": "rms_energy",
+      "window": "long_tail",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Signal should sustain with extreme feedback"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "long_tail",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Must not clip even with extreme feedback"
+    },
+    "slow_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "long_tail",
+      "threshold": {
+        "max_upward_steps": 500,
+        "upward_step_db_max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "Decay should be very slow but stable"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_extreme_feedback",
+      "capability_class": "extreme_feedback"
+    }
+  },
+
+  "use_cases": [
+    "Verify extreme feedback stability",
+    "Test boundary conditions",
+    "Ensure no numerical instability",
+    "Validate saturation behavior"
+  ],
+
+  "pass_criteria": "Stable sustained signal without runaway or clipping",
+
+  "example_failures": [
+    "Energy grows → Feedback loop unstable",
+    "Clipping → Saturation not working",
+    "NaN/Inf → Numerical instability"
+  ]
+}

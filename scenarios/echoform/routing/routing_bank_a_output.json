@@ -1,0 +1,97 @@
+{
+  "scenario_version": "1.0",
+  "id": "routing_bank_a_output",
+  "name": "Routing: Bank A Output Path",
+  "category": "routing_modes",
+  "description": "Test Bank A modifiers applied on output path (routingModeA=Out) with dropout modulation",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "TIME_VARYING"],
+    "excluded_behaviors": [],
+    "notes": "Tests routing mode A=Out with MOD2 (dropout) active"
+  },
+
+  "parameter_variations": {},
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.2,
+      "duration_seconds": 2.0
+    }
+  },
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full response"
+    },
+    "steady": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 1.5,
+      "description": "Steady-state region"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain signal despite dropout"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "dropout_modulation": {
+      "metric": "rms_variance",
+      "window": "steady",
+      "threshold": {
+        "min": 0.0001
+      },
+      "severity": "soft_warn",
+      "description": "Dropout should create RMS variation"
+    },
+    "allow_dropout_artifacts": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 100,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Dropout effect intentionally creates discontinuities"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "routing_bank_a_output",
+      "routing_mode": "output_path"
+    }
+  },
+
+  "use_cases": [
+    "Verify Bank A routing mode 'Out' applies modifiers to output",
+    "Test dropout modulation on output path",
+    "Validate signal routing correctness"
+  ],
+
+  "pass_criteria": "Generates output with dropout modulation, no clipping, expected artifacts present"
+}

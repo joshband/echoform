@@ -1,0 +1,98 @@
+{
+  "id": "stress_determinism_multi_seed",
+  "name": "Determinism Multi-Seed Stress Test",
+  "description": "Tests tape mode stochasticity and determinism across multiple random seeds. Validates that tape mode produces consistent (deterministic) output for the same seed but different output for different seeds.",
+  "effect_type": "delay",
+  "capabilities": {
+    "stateful": true,
+    "sample_rate_dependent": true
+  },
+  "stimulus": {
+    "type": "white_noise",
+    "duration_seconds": 8.0,
+    "amplitude": 0.5,
+    "seed": 12345
+  },
+  "transport": {
+    "bpm": 120.0,
+    "time_signature_numerator": 4,
+    "time_signature_denominator": 4
+  },
+  "parameter_automation": [
+    {
+      "parameter_name": "tape_mode",
+      "time_points": [0.0],
+      "values": [1.0]
+    },
+    {
+      "parameter_name": "delay_size_ms",
+      "time_points": [0.0],
+      "values": [500.0]
+    },
+    {
+      "parameter_name": "feedback",
+      "time_points": [0.0],
+      "values": [0.7]
+    },
+    {
+      "parameter_name": "mix",
+      "time_points": [0.0],
+      "values": [1.0]
+    },
+    {
+      "parameter_name": "wow_flutter_amount",
+      "time_points": [0.0],
+      "values": [0.5]
+    },
+    {
+      "parameter_name": "dropout_amount",
+      "time_points": [0.0],
+      "values": [0.3]
+    },
+    {
+      "parameter_name": "character",
+      "time_points": [0.0],
+      "values": [0.6]
+    }
+  ],
+  "analysis": {
+    "window_start": 1.0,
+    "window_end": 8.0
+  },
+  "invariants": [
+    {
+      "metric": "rms_energy",
+      "tier": "A",
+      "threshold_min": -80.0,
+      "threshold_max": -20.0,
+      "description": "Signal energy should be present with tape mode active"
+    },
+    {
+      "metric": "peak_level",
+      "tier": "A",
+      "threshold_min": -20.0,
+      "threshold_max": 0.0,
+      "description": "Peak level should be reasonable"
+    },
+    {
+      "metric": "spectral_flux",
+      "tier": "C",
+      "threshold_min": 0.01,
+      "threshold_max": 2.0,
+      "description": "Tape mode should introduce spectral variation"
+    },
+    {
+      "metric": "dc_offset",
+      "tier": "B",
+      "threshold_min": -0.01,
+      "threshold_max": 0.01,
+      "description": "DC offset should remain negligible"
+    }
+  ],
+  "tags": ["stress_test", "determinism", "tape_mode", "stochasticity", "random_seed"],
+  "notes": [
+    "This scenario tests determinism with seed=12345.",
+    "To test multiple seeds, run this scenario multiple times with different seed values (e.g., 54321, 99999, 11111, 77777).",
+    "Expected behavior: Same seed → identical output, different seeds → different output (but same statistical properties)."
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "scenario_version": "1.0",
+  "id": "spread_negative_offset",
+  "name": "Spread: Negative Offset (R Ahead)",
+  "category": "dual_playhead",
+  "description": "Test negative spread parameter (right playhead ahead of left) for stereo width verification",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests dual-playhead spread with right channel ahead"
+  },
+  "parameter_variations": {},
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full impulse response"
+    },
+    "initial": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 0.5,
+      "description": "Initial response region"
+    }
+  },
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain delayed signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "time_delay_present": {
+      "metric": "itd_max_ms",
+      "window": "initial",
+      "threshold": {
+        "min": 0.05,
+        "max": 500.0
+      },
+      "severity": "soft_warn",
+      "description": "Inter-aural time difference should reflect spread offset"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "scenario_id": "spread_negative_offset",
+      "spread_direction": "negative_right_ahead"
+    }
+  },
+  "use_cases": [
+    "Verify negative spread parameter creates right channel advance",
+    "Test dual-playhead stereo width in opposite direction",
+    "Validate spread bidirectional operation"
+  ],
+  "pass_criteria": "Generates stereo output with decorrelation, right channel ahead of left, no clipping"
+}

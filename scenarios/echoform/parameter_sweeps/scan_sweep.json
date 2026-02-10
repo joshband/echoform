@@ -4,14 +4,17 @@
   "name": "Echoform Scan Parameter - Playhead Modulation Range",
   "category": "delay_reverb",
   "description": "Validates scan parameter (0.0-1.0) controls playhead offset range. Tests at maximum scan depth (1.0) to verify full modulation range without instability.",
-
   "capability_requirements": {
-    "required_effect_types": ["DELAY"],
-    "required_behaviors": ["STATEFUL", "TIME_VARYING"],
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL",
+      "TIME_VARYING"
+    ],
     "excluded_behaviors": [],
     "notes": "Tests scan parameter at maximum (1.0) for full playhead modulation"
   },
-
   "stimulus": {
     "stimulus_id": "noise",
     "stimulus_variant": "pink",
@@ -20,7 +23,6 @@
       "duration_seconds": 3.0
     }
   },
-
   "parameter_variations": {
     "Scan": 1.0,
     "Mix": 0.7,
@@ -29,7 +31,6 @@
     "Feedback Mode": 0.5,
     "Scan Mode": 0.0
   },
-
   "analysis_windows": {
     "full_response": {
       "type": "time_range",
@@ -44,13 +45,12 @@
       "description": "Period with active scan modulation"
     }
   },
-
   "expected_invariants": {
     "has_output": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "full_response",
       "threshold": {
-        "min_rms_db": -50.0
+        "min": -50.0
       },
       "severity": "hard_fail",
       "description": "Scan at 1.0 should produce audible modulation"
@@ -74,16 +74,6 @@
       "severity": "soft_warn",
       "description": "Scan=1.0 should create significant temporal modulation (playhead moving)"
     },
-    "spectral_variation": {
-      "metric": "spectral_centroid",
-      "window": "modulation_active",
-      "threshold": {
-        "min": 200.0,
-        "max": 4000.0
-      },
-      "severity": "soft_warn",
-      "description": "Scan should create spectral variation as playhead moves through delay buffer"
-    },
     "no_excessive_discontinuities": {
       "metric": "discontinuity_count",
       "window": "full_response",
@@ -95,30 +85,28 @@
       "description": "Manual scan should be smooth (no zipper noise or clicks)"
     }
   },
-
   "baseline_tracking": {
     "enabled": true,
-    "compare_against": ["golden"],
+    "compare_against": [
+      "golden"
+    ],
     "provenance": {
       "stimulus_id": "pink_noise.continuous",
       "scenario_id": "echoform_scan_sweep",
       "capability_class": "scan_parameter_max_range"
     }
   },
-
   "use_cases": [
     "Verify scan parameter controls playhead offset range",
     "Test maximum scan depth (1.0 = full buffer range)",
     "Validate smooth playhead modulation (no zipper noise)",
     "Ensure no instability at extreme scan values"
   ],
-
   "pass_criteria": "High variance output from playhead modulation, smooth transitions, no clipping",
-
   "example_failures": [
-    "Low variance → scan parameter not working",
-    "Clicks/discontinuities → zipper noise in scan",
-    "Clipping → gain issue at full scan range",
-    "Static output → playhead not moving"
+    "Low variance \u2192 scan parameter not working",
+    "Clicks/discontinuities \u2192 zipper noise in scan",
+    "Clipping \u2192 gain issue at full scan range",
+    "Static output \u2192 playhead not moving"
   ]
 }

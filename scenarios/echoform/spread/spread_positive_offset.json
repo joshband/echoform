@@ -1,0 +1,86 @@
+{
+  "scenario_version": "1.0",
+  "id": "spread_positive_offset",
+  "name": "Spread: Positive Offset (R Delayed)",
+  "category": "dual_playhead",
+  "description": "Test positive spread parameter (right playhead delayed relative to left) for stereo width verification",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests dual-playhead spread with right channel delayed"
+  },
+  "parameter_variations": {},
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.5,
+      "offset_samples": 0
+    }
+  },
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full impulse response"
+    },
+    "initial": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 0.5,
+      "description": "Initial response region"
+    }
+  },
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain delayed signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "time_delay_present": {
+      "metric": "itd_max_ms",
+      "window": "initial",
+      "threshold": {
+        "min": 0.1,
+        "max": 500.0
+      },
+      "severity": "soft_warn",
+      "description": "Inter-aural time difference should reflect spread offset"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "scenario_id": "spread_positive_offset",
+      "spread_direction": "positive_right_delayed"
+    }
+  },
+  "use_cases": [
+    "Verify positive spread parameter creates right channel delay",
+    "Test dual-playhead stereo width",
+    "Validate spread offset accuracy"
+  ],
+  "pass_criteria": "Generates stereo output with decorrelation, right channel delayed, no clipping"
+}

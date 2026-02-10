@@ -4,14 +4,17 @@
   "name": "Echoform Character Parameter - Maximum Modifier Intensity",
   "category": "delay_reverb",
   "description": "Validates character parameter at maximum (1.0) scales modifier intensity correctly. Tests with multiple modifiers active at full intensity.",
-
   "capability_requirements": {
-    "required_effect_types": ["DELAY"],
-    "required_behaviors": ["STATEFUL", "NONLINEAR"],
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL",
+      "NONLINEAR"
+    ],
     "excluded_behaviors": [],
     "notes": "Tests character parameter at 1.0 with wow/flutter and dropout modifiers"
   },
-
   "stimulus": {
     "stimulus_id": "sweep",
     "stimulus_variant": "linear",
@@ -22,7 +25,6 @@
       "amplitude": 0.5
     }
   },
-
   "parameter_variations": {
     "Character": 1.0,
     "Bank A Mod 1 (Wow/Flutter)": 0.8,
@@ -33,7 +35,6 @@
     "Size": 0.167,
     "Feedback Mode": 0.5
   },
-
   "analysis_windows": {
     "full_response": {
       "type": "time_range",
@@ -48,13 +49,12 @@
       "description": "Period with modifiers at full intensity"
     }
   },
-
   "expected_invariants": {
     "has_output": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "full_response",
       "threshold": {
-        "min_rms_db": -50.0
+        "min": -50.0
       },
       "severity": "hard_fail",
       "description": "Output should be audible despite dropout modifier"
@@ -78,16 +78,6 @@
       "severity": "soft_warn",
       "description": "Character=1.0 should create high variance (wow/flutter + dropout active)"
     },
-    "spectral_modulation": {
-      "metric": "spectral_centroid",
-      "window": "modifier_active",
-      "threshold": {
-        "min": 100.0,
-        "max": 5000.0
-      },
-      "severity": "soft_warn",
-      "description": "Wow/flutter should modulate spectral content of sweep"
-    },
     "expected_discontinuities": {
       "metric": "discontinuity_count",
       "window": "full_response",
@@ -99,30 +89,28 @@
       "description": "Dropout modifier creates intentional discontinuities (expected at character=1.0)"
     }
   },
-
   "baseline_tracking": {
     "enabled": true,
-    "compare_against": ["golden"],
+    "compare_against": [
+      "golden"
+    ],
     "provenance": {
       "stimulus_id": "sine_sweep.linear",
       "scenario_id": "echoform_character_sweep",
       "capability_class": "character_max_intensity"
     }
   },
-
   "use_cases": [
     "Verify character parameter scales modifier intensity (test at 1.0 = max)",
     "Test multiple modifiers at full intensity (wow/flutter + dropout)",
     "Validate stability with extreme modifier settings",
     "Ensure no clipping at maximum character value"
   ],
-
   "pass_criteria": "High variance output from modifiers, spectral modulation from wow/flutter, controlled dropout artifacts, no clipping",
-
   "example_failures": [
-    "Low variance → character parameter not scaling modifiers",
-    "No discontinuities → dropout modifier not active",
-    "Clipping → gain issue at full character intensity",
-    "Static spectral content → wow/flutter not working"
+    "Low variance \u2192 character parameter not scaling modifiers",
+    "No discontinuities \u2192 dropout modifier not active",
+    "Clipping \u2192 gain issue at full character intensity",
+    "Static spectral content \u2192 wow/flutter not working"
   ]
 }

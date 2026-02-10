@@ -1,0 +1,97 @@
+{
+  "scenario_version": "1.0",
+  "id": "stress_parameter_slew",
+  "name": "Stress Test: Rapid Parameter Changes",
+  "category": "stress_test",
+  "description": "Stress test with rapid parameter changes to validate smoothing, real-time safety, and artifact handling",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests parameter change handling under stress"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.3,
+      "duration_seconds": 3.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full stress test duration"
+    },
+    "steady": {
+      "type": "time_range",
+      "start_seconds": 1.0,
+      "end_seconds": 2.5,
+      "description": "Steady-state region"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should have signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping despite parameter changes"
+    },
+    "glitch_tolerance": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 2000,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Allow some discontinuities from parameter changes"
+    },
+    "no_runaway": {
+      "metric": "energy_growth",
+      "window": "steady",
+      "threshold": {
+        "max_growth_db": 3.0
+      },
+      "severity": "hard_fail",
+      "description": "Energy should not grow excessively"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "stress_parameter_slew",
+      "test_type": "stress_slew_rate"
+    }
+  },
+
+  "use_cases": [
+    "Test parameter smoothing under rapid changes",
+    "Validate real-time safety (no allocations)",
+    "Ensure artifact-free operation during automation"
+  ],
+
+  "pass_criteria": "Stable output under rapid parameter changes, controlled discontinuities, no clipping"
+}

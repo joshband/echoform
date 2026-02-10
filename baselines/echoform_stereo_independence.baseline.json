@@ -1,0 +1,10 @@
+{
+  "metrics": {
+    "monotonic_tail_decay": 2.0,
+    "peak_level": -4.323004245758057,
+    "rms_energy": -9.351518630981445
+  },
+  "scenario_id": "echoform_stereo_independence",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

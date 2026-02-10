@@ -47,10 +47,10 @@
 
   "expected_invariants": {
     "wet_signal_present": {
-      "metric": "signal_present",
+      "metric": "rms_energy",
       "window": "full_response",
       "threshold": {
-        "min_rms_db": -55.0
+        "min": -55.0
       },
       "severity": "hard_fail",
       "description": "Wet signal should be present (dry killed but wet active)"

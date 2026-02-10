@@ -1,0 +1,102 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_size_sweep",
+  "name": "Size Parameter Sweep Stability",
+  "category": "delay_reverb",
+  "description": "Validates that changing the size parameter doesn't create discontinuities or artifacts. Tests smooth buffer size transitions with crossfading.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests size parameter changes and buffer crossfading"
+  },
+
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 440.0,
+      "num_harmonics": 1,
+      "amplitude": 0.6,
+      "duration_seconds": 4.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_sweep": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Complete size sweep"
+    }
+  },
+
+  "expected_invariants": {
+    "signal_sustained": {
+      "metric": "rms_energy",
+      "window": "full_sweep",
+      "threshold": {
+        "min": -55.0
+      },
+      "severity": "hard_fail",
+      "description": "Signal should remain audible during size changes"
+    },
+    "smooth_transitions": {
+      "metric": "discontinuity_count",
+      "window": "full_sweep",
+      "threshold": {
+        "max_count": 5000,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Size changes should be smooth (crossfaded)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_sweep",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping during size changes"
+    },
+    "stable_processing": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_sweep",
+      "threshold": {
+        "max_upward_steps": 300,
+        "upward_step_db_max": 2.5
+      },
+      "severity": "soft_warn",
+      "description": "Stable despite parameter changes"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sine.continuous",
+      "scenario_id": "echoform_size_sweep",
+      "capability_class": "size_crossfade"
+    }
+  },
+
+  "use_cases": [
+    "Verify size parameter changes",
+    "Test buffer crossfading",
+    "Ensure no clicks during transitions",
+    "Validate smooth size modulation"
+  ],
+
+  "pass_criteria": "Smooth size transitions without clicks or discontinuities",
+
+  "example_failures": [
+    "Clicks during transition → Crossfade broken",
+    "Signal drops → Buffer management issue",
+    "Instability → Size calculation error"
+  ]
+}

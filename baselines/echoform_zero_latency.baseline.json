@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "peak_level": -7.958800315856934,
+    "rms_energy": -54.4466552734375
+  },
+  "scenario_id": "echoform_zero_latency",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

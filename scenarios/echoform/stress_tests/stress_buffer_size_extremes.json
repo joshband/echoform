@@ -1,0 +1,72 @@
+{
+  "id": "stress_buffer_size_extremes",
+  "name": "Buffer Size Extremes Stress Test",
+  "description": "Tests Echoform at minimum (50ms) and maximum (60s) buffer sizes to validate memory allocation, wraparound logic, and stability at size extremes.",
+  "effect_type": "delay",
+  "capabilities": {
+    "stateful": true,
+    "sample_rate_dependent": true
+  },
+  "stimulus": {
+    "type": "impulse",
+    "duration_seconds": 65.0,
+    "amplitude": 0.5
+  },
+  "transport": {
+    "bpm": 120.0,
+    "time_signature_numerator": 4,
+    "time_signature_denominator": 4
+  },
+  "parameter_automation": [
+    {
+      "parameter_name": "delay_size_ms",
+      "time_points": [0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0],
+      "values": [50.0, 100.0, 1000.0, 10000.0, 30000.0, 60000.0, 50.0]
+    },
+    {
+      "parameter_name": "feedback",
+      "time_points": [0.0],
+      "values": [0.5]
+    },
+    {
+      "parameter_name": "mix",
+      "time_points": [0.0],
+      "values": [1.0]
+    }
+  ],
+  "analysis": {
+    "window_start": 0.0,
+    "window_end": 65.0
+  },
+  "invariants": [
+    {
+      "metric": "rms_energy",
+      "tier": "A",
+      "threshold_min": -80.0,
+      "threshold_max": -20.0,
+      "description": "Signal energy should be present across all buffer sizes"
+    },
+    {
+      "metric": "peak_level",
+      "tier": "A",
+      "threshold_min": -20.0,
+      "threshold_max": 0.0,
+      "description": "Peak level should be reasonable without clipping"
+    },
+    {
+      "metric": "discontinuity_count",
+      "tier": "A",
+      "threshold_min": 0.0,
+      "threshold_max": 100.0,
+      "description": "Size changes may cause brief discontinuities but should be minimal"
+    },
+    {
+      "metric": "dc_offset",
+      "tier": "B",
+      "threshold_min": -0.01,
+      "threshold_max": 0.01,
+      "description": "DC offset should remain negligible"
+    }
+  ],
+  "tags": ["stress_test", "buffer_size", "extremes", "memory"]
+}

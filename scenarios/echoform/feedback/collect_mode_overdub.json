@@ -1,0 +1,100 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_collect_overdub",
+  "name": "Collect Mode Overdub Accumulation",
+  "category": "delay_reverb",
+  "description": "Validates that Collect feedback mode accumulates/overdubs samples in the buffer over time. Migrated from MemoryDelayEngineTests::testCollectOverdub().",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests Collect mode overdubbing behavior"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "periodic",
+    "parameters": {
+      "amplitude": 0.3,
+      "period_seconds": 0.2,
+      "num_pulses": 10
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_accumulation": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full accumulation period"
+    }
+  },
+
+  "expected_invariants": {
+    "energy_increases": {
+      "metric": "energy_growth",
+      "window": "full_accumulation",
+      "threshold": {
+        "allow_increase_pct": 500.0
+      },
+      "severity": "hard_fail",
+      "description": "Collect mode should accumulate energy over time"
+    },
+    "signal_sustained": {
+      "metric": "rms_energy",
+      "window": "full_accumulation",
+      "threshold": {
+        "min": -40.0
+      },
+      "severity": "hard_fail",
+      "description": "Accumulated signal should be audible"
+    },
+    "no_clipping_despite_accumulation": {
+      "metric": "peak_level",
+      "window": "full_accumulation",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Overdubbing should not cause clipping (tanh saturation expected)"
+    },
+    "smooth_accumulation": {
+      "metric": "discontinuity_count",
+      "window": "full_accumulation",
+      "threshold": {
+        "max_count": 5000,
+        "detection_threshold_db": -35.0
+      },
+      "severity": "soft_warn",
+      "description": "Accumulation should be smooth (allow granular texture)"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse_train.periodic",
+      "scenario_id": "echoform_collect_overdub",
+      "capability_class": "collect_mode"
+    }
+  },
+
+  "use_cases": [
+    "Verify Collect mode accumulation",
+    "Test overdub behavior",
+    "Validate saturation limits",
+    "Ensure smooth energy build-up"
+  ],
+
+  "pass_criteria": "Energy grows continuously without clipping or artifacts",
+
+  "example_failures": [
+    "No energy growth → Collect mode not working",
+    "Clipping → Saturation broken",
+    "Sudden jumps → Accumulation not smooth"
+  ]
+}

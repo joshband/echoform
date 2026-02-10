@@ -1,0 +1,10 @@
+{
+  "metrics": {
+    "energy_growth": 0.0,
+    "monotonic_tail_decay": 0.0,
+    "peak_level": -7.958800315856934
+  },
+  "scenario_id": "echoform_feed_mode_stability",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

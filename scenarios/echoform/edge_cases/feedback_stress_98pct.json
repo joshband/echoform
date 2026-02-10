@@ -1,0 +1,105 @@
+{
+  "scenario_version": "1.0",
+  "id": "feedback_stress_98pct",
+  "name": "Feedback Stability at 98% Threshold",
+  "category": "edge_cases",
+  "description": "Stress test for feedback stability at 98% (near-unity gain). Validates that the delay engine remains stable and does not diverge into clipping or NaN under sustained feedback pressure.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests feedback stability at extreme threshold"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "duration_seconds": 5.0,
+      "amplitude": 0.1
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "late": {
+      "type": "time_range",
+      "start_seconds": 3.0,
+      "end_seconds": 5.0,
+      "description": "Late stage - after feedback has built up"
+    },
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Full response for overall stability"
+    }
+  },
+
+  "expected_invariants": {
+    "no_runaway": {
+      "metric": "peak_level",
+      "window": "late",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Feedback should not cause runaway clipping"
+    },
+    "no_non_finite": {
+      "metric": "non_finite",
+      "window": "late",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "No NaN/Inf from extreme feedback"
+    },
+    "energy_present": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Should have sustained energy from feedback"
+    },
+    "dc_offset_check": {
+      "metric": "dc_offset",
+      "window": "late",
+      "threshold": {
+        "max_abs_mean": 0.01
+      },
+      "severity": "soft_warn",
+      "description": "Check for DC buildup from feedback"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "noise.white",
+      "scenario_id": "feedback_stress_98pct",
+      "capability_class": "extreme_feedback_stability"
+    }
+  },
+
+  "use_cases": [
+    "Stress test feedback loop stability",
+    "Validate anti-runaway mechanisms",
+    "Test near-unity gain behavior",
+    "Verify no numerical overflow"
+  ],
+
+  "pass_criteria": "Maintains stability at 98% feedback without clipping, NaN, or DC buildup",
+
+  "example_failures": [
+    "Clipping → Feedback runaway",
+    "NaN/Inf → Numerical overflow",
+    "DC offset → Integrator leak",
+    "Silent → Feedback damping too aggressive"
+  ]
+}

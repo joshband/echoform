@@ -1,0 +1,107 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_auto_scan_modulation",
+  "name": "Auto-Scan LFO Modulation",
+  "category": "delay_reverb",
+  "description": "Validates that auto-scan mode creates smooth LFO-based playhead modulation without discontinuities. Tests automatic scan behavior with deterministic randomization.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests auto-scan LFO modulation with fixed seed"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.5,
+      "duration_seconds": 4.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_modulation": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Complete auto-scan cycle"
+    },
+    "steady_modulation": {
+      "type": "time_range",
+      "start_seconds": 1.0,
+      "end_seconds": 4.0,
+      "description": "After LFO stabilizes"
+    }
+  },
+
+  "expected_invariants": {
+    "modulation_active": {
+      "metric": "rms_variance",
+      "window": "steady_modulation",
+      "threshold": {
+        "min": 0.01,
+        "max": 0.5
+      },
+      "severity": "hard_fail",
+      "description": "Auto-scan should create measurable modulation"
+    },
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full_modulation",
+      "threshold": {
+        "min": -55.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should be audible throughout"
+    },
+    "smooth_modulation": {
+      "metric": "discontinuity_count",
+      "window": "full_modulation",
+      "threshold": {
+        "max_count": 5000,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Modulation should be smooth (allows granular texture)"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_modulation",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping during modulation"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "white_noise.continuous",
+      "scenario_id": "echoform_auto_scan_modulation",
+      "capability_class": "auto_scan",
+      "notes": "Deterministic with fixed random seed"
+    }
+  },
+
+  "use_cases": [
+    "Verify auto-scan LFO functionality",
+    "Test smooth playhead modulation",
+    "Ensure no zipper noise",
+    "Validate deterministic modulation"
+  ],
+
+  "pass_criteria": "Smooth LFO modulation without discontinuities",
+
+  "example_failures": [
+    "No variance → LFO not running",
+    "Discontinuities → Zipper noise in scan",
+    "Non-deterministic → Seed not applied"
+  ]
+}

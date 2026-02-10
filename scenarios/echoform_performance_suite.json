@@ -1,0 +1,15 @@
+{
+  "id": "echoform_performance_suite",
+  "name": "Echoform Performance Profiling Suite",
+  "description": "Performance profiling scenarios for Echoform. Validates real-time safety, block processing timing, and allocation-free operation. Run with enableProfiling=true in ExecutionConfig.",
+  "scenario_ids": [
+    "echoform_perf_baseline"
+  ],
+  "stopOnFirstFailure": false,
+  "sharedConfig": {
+    "sample_rate": 48000,
+    "block_size": 512,
+    "output_dir": "qa_output",
+    "enable_profiling": true
+  }
+}

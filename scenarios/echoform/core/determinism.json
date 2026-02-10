@@ -1,0 +1,109 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_determinism",
+  "name": "Deterministic Rendering with Fixed Seed",
+  "category": "delay_reverb",
+  "description": "Validates that Echoform produces bit-identical output when using the same random seed and parameters. Essential for regression testing and baseline comparison. Migrated from DeterminismTest.cpp.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests deterministic behavior with auto-scan and modulation"
+  },
+
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 440.0,
+      "num_harmonics": 1,
+      "amplitude": 0.7,
+      "duration_seconds": 4.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_render": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 4.0,
+      "description": "Complete render with auto-scan and modulation"
+    },
+    "steady_state": {
+      "type": "time_range",
+      "start_seconds": 2.0,
+      "end_seconds": 4.0,
+      "description": "After initial transients"
+    }
+  },
+
+  "expected_invariants": {
+    "has_output": {
+      "metric": "rms_energy",
+      "window": "full_render",
+      "threshold": {
+        "min": -50.0
+      },
+      "severity": "hard_fail",
+      "description": "Should produce audible output"
+    },
+    "stable_processing": {
+      "metric": "monotonic_tail_decay",
+      "window": "steady_state",
+      "threshold": {
+        "max_upward_steps": 300,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Processing should be stable with modulation"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_render",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping with feedback and modulation"
+    },
+    "rms_variance_check": {
+      "metric": "rms_variance",
+      "window": "steady_state",
+      "threshold": {
+        "min": 0.001,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "Auto-scan and modulation should create variance"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden", "rolling"],
+    "provenance": {
+      "stimulus_id": "sine.continuous",
+      "scenario_id": "echoform_determinism",
+      "capability_class": "deterministic_modulation",
+      "notes": "Critical for regression detection - bit-identical output expected with fixed seed"
+    }
+  },
+
+  "use_cases": [
+    "Verify deterministic behavior",
+    "Enable reliable regression testing",
+    "Test auto-scan with fixed seed",
+    "Validate modifier determinism"
+  ],
+
+  "pass_criteria": "Produces consistent, stable output with auto-scan and modulation active",
+
+  "example_failures": [
+    "Different output each run → Random seed not working",
+    "Unstable → Feedback or modulation issue",
+    "Baseline mismatch → Algorithm change or bug"
+  ]
+}

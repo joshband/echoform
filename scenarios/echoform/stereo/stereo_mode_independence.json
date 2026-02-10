@@ -1,0 +1,89 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_stereo_independence",
+  "name": "Independent Stereo Mode Channel Separation",
+  "category": "delay_reverb",
+  "description": "Validates that Independent stereo mode maintains proper channel separation with minimal cross-talk. Tests dual-mono behavior.",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests Independent stereo mode channel isolation"
+  },
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 220.0,
+      "num_harmonics": 2,
+      "amplitude": 0.6,
+      "duration_seconds": 3.0
+    }
+  },
+  "parameter_variations": {},
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Complete stereo response"
+    }
+  },
+  "expected_invariants": {
+    "both_channels_active": {
+      "metric": "rms_energy",
+      "window": "full_response",
+      "threshold": {
+        "min": -50.0
+      },
+      "severity": "hard_fail",
+      "description": "Both channels should be active"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping in either channel"
+    },
+    "stable_output": {
+      "metric": "monotonic_tail_decay",
+      "window": "full_response",
+      "threshold": {
+        "max_upward_steps": 200,
+        "upward_step_db_max": 2.0
+      },
+      "severity": "soft_warn",
+      "description": "Stable processing per channel"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "stimulus_id": "dual_tone.stereo_split",
+      "scenario_id": "echoform_stereo_independence",
+      "capability_class": "stereo_independent"
+    }
+  },
+  "use_cases": [
+    "Verify Independent stereo mode",
+    "Test channel separation",
+    "Ensure minimal cross-talk",
+    "Validate dual-mono processing"
+  ],
+  "pass_criteria": "Channels remain independent with low correlation",
+  "example_failures": [
+    "High correlation \u2192 Channels bleeding together",
+    "Mono output \u2192 Stereo mode not working",
+    "One channel silent \u2192 Processing broken"
+  ]
+}

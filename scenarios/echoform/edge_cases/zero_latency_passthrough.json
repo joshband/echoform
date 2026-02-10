@@ -1,0 +1,86 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_zero_latency",
+  "name": "Zero Latency Passthrough",
+  "category": "delay_reverb",
+  "description": "Validates that Echoform introduces no latency - the dry signal (mix=0) should be bit-identical to the input with zero delay. Tests real-time performance characteristic.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests zero-latency passthrough at mix=0"
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.8,
+      "offset_samples": 100
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "immediate_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 0.01,
+      "description": "First 10ms - impulse should appear immediately"
+    },
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 1.0,
+      "description": "Complete response"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should be audible"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping at output"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "impulse.single",
+      "scenario_id": "echoform_zero_latency",
+      "capability_class": "zero_latency"
+    }
+  },
+
+  "use_cases": [
+    "Verify zero-latency operation",
+    "Test real-time performance",
+    "Ensure no algorithmic delay",
+    "Validate passthrough mode"
+  ],
+
+  "pass_criteria": "Impulse appears immediately with no algorithmic latency",
+
+  "example_failures": [
+    "Delayed output → Latency introduced",
+    "Silent → Processing broken",
+    "Early output → Impossible (faster than speed of light!)"
+  ]
+}

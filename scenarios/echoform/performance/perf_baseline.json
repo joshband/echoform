@@ -1,0 +1,109 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_perf_baseline",
+  "name": "Performance Baseline Profile",
+  "category": "performance",
+  "description": "Performance profiling scenario for Echoform. Measures block processing time to validate real-time safety (median < 10% available time, P95 < 20%).",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests typical Echoform usage with moderate settings"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.5,
+      "duration_seconds": 15.0,
+      "seed": 42
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 2.0,
+      "end_seconds": 15.0,
+      "description": "Performance measurement window (after warmup)"
+    }
+  },
+
+  "expected_invariants": {
+    "perf_median": {
+      "metric": "perf_median_block_time_ms",
+      "window": "full",
+      "threshold": {
+        "max": 1.066
+      },
+      "severity": "hard_fail",
+      "description": "Median block time must be < 10% of available time (512 samples @ 48kHz = 10.67ms → 1.066ms)"
+    },
+    "perf_p95": {
+      "metric": "perf_p95_block_time_ms",
+      "window": "full",
+      "threshold": {
+        "max": 2.133
+      },
+      "severity": "hard_fail",
+      "description": "P95 block time must be < 20% of available time (2.133ms)"
+    },
+    "perf_p99_warn": {
+      "metric": "perf_p99_block_time_ms",
+      "window": "full",
+      "threshold": {
+        "max": 3.2
+      },
+      "severity": "soft_warn",
+      "description": "P99 block time should be < 30% of available time (3.2ms)"
+    },
+    "rms_sanity": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Signal energy sanity check"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping during profiling"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "noise.white",
+      "scenario_id": "echoform_perf_baseline",
+      "capability_class": "performance_profiling",
+      "notes": "Performance baseline for regression detection. Run with --enable-profiling flag."
+    }
+  },
+
+  "use_cases": [
+    "Validate real-time safety",
+    "Measure block processing time",
+    "Detect performance regressions",
+    "Profile typical usage"
+  ],
+
+  "pass_criteria": "Median < 1.066ms (10%), P95 < 2.133ms (20%), P99 < 3.2ms (30%)",
+
+  "example_failures": [
+    "Median > 1.066ms → Optimization needed",
+    "P95 > 2.133ms → Tail latency issue",
+    "Allocations detected → RT-safety violation"
+  ]
+}

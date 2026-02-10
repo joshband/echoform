@@ -1,0 +1,11 @@
+{
+  "metrics": {
+    "discontinuity_count": 2999.0,
+    "peak_level": -6.6724348068237305,
+    "rms_energy": -10.947941780090332,
+    "rms_variance": 0.0006136824218533487
+  },
+  "scenario_id": "echoform_wow_flutter",
+  "timestamp": "2026-02-10T04:53:38Z",
+  "version": "v1.0.0"
+}

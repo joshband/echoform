@@ -1,0 +1,106 @@
+{
+  "scenario_version": "1.0",
+  "id": "routing_bank_a_feed",
+  "name": "Routing: Bank A Feedback Path",
+  "category": "routing_modes",
+  "description": "Test Bank A modifiers applied in feedback path (routingModeA=Feed) with wow/flutter and tone shaping",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "TIME_VARYING", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Tests routing mode A=Feed with MOD1 (wow/flutter) + MOD3 (tone) in feedback loop"
+  },
+
+  "parameter_variations": {},
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.3,
+      "offset_samples": 0
+    }
+  },
+
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Full impulse response"
+    },
+    "tail": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 2.5,
+      "description": "Feedback tail region"
+    }
+  },
+
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should have feedback tail"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Feedback should not cause runaway"
+    },
+    "feedback_modulation": {
+      "metric": "rms_variance",
+      "window": "tail",
+      "threshold": {
+        "min": 0.0001
+      },
+      "severity": "soft_warn",
+      "description": "Modulation in feedback loop should create variation"
+    },
+    "feedback_stable": {
+      "metric": "energy_growth",
+      "window": "tail",
+      "threshold": {
+        "allow_increase_pct": 10.0
+      },
+      "severity": "soft_warn",
+      "description": "Feedback should not cause significant energy increase"
+    },
+    "general_decay": {
+      "metric": "monotonic_tail_decay",
+      "window": "tail",
+      "threshold": {
+        "max_upward_steps": 200,
+        "upward_step_db_max": 3.0
+      },
+      "severity": "soft_warn",
+      "description": "Allow modulation variation but expect general decay trend"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "routing_bank_a_feed",
+      "routing_mode": "feedback_path"
+    }
+  },
+
+  "use_cases": [
+    "Verify Bank A routing mode 'Feed' applies modifiers in feedback loop",
+    "Test modulation stability in feedback path",
+    "Validate feedback loop routing correctness"
+  ],
+
+  "pass_criteria": "Generates stable feedback tail with modulation, no runaway, controlled decay"
+}

@@ -1,0 +1,11 @@
+{
+  "metrics": {
+    "monotonic_tail_decay": 0.0,
+    "peak_level": -6.6724348068237305,
+    "rms_energy": -10.715978622436523,
+    "rms_variance": 0.0004724119940892052
+  },
+  "scenario_id": "echoform_determinism",
+  "timestamp": "2026-02-10T04:53:37Z",
+  "version": "v1.0.0"
+}

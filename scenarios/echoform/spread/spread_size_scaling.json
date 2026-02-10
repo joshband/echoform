@@ -1,0 +1,99 @@
+{
+  "scenario_version": "1.0",
+  "id": "spread_size_scaling",
+  "name": "Spread: Size Parameter Scaling",
+  "category": "dual_playhead",
+  "description": "Verify that spread parameter scales with size parameter (larger size = larger spread offset)",
+  "capability_requirements": {
+    "required_effect_types": [
+      "DELAY"
+    ],
+    "required_behaviors": [
+      "STATEFUL"
+    ],
+    "excluded_behaviors": [],
+    "notes": "Tests spread/size interaction - spread should scale proportionally to size"
+  },
+  "parameter_variations": {},
+  "stimulus": {
+    "stimulus_id": "multitone",
+    "stimulus_variant": "harmonic",
+    "parameters": {
+      "fundamental_hz": 100.0,
+      "num_harmonics": 8,
+      "amplitude": 0.3,
+      "duration_seconds": 2.0
+    }
+  },
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 2.0,
+      "description": "Full response"
+    },
+    "steady": {
+      "type": "time_range",
+      "start_seconds": 0.5,
+      "end_seconds": 1.5,
+      "description": "Steady-state region"
+    }
+  },
+  "expected_invariants": {
+    "rms_energy": {
+      "metric": "rms_energy",
+      "window": "full",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Output should contain delayed signal"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "Output should not clip"
+    },
+    "time_delay_moderate": {
+      "metric": "itd_max_ms",
+      "window": "steady",
+      "threshold": {
+        "min": 1.0,
+        "max": 1000.0
+      },
+      "severity": "soft_warn",
+      "description": "ITD should reflect size-scaled spread offset"
+    },
+    "iacc_stereo_field": {
+      "metric": "iacc_early",
+      "window": "steady",
+      "threshold": {
+        "min": 0.0,
+        "max": 0.95
+      },
+      "severity": "soft_warn",
+      "description": "Inter-aural cross-correlation should show stereo field"
+    }
+  },
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": [
+      "golden"
+    ],
+    "provenance": {
+      "scenario_id": "spread_size_scaling",
+      "size_seconds": 0.5,
+      "spread_normalized": 0.5
+    }
+  },
+  "use_cases": [
+    "Verify spread scales proportionally with size parameter",
+    "Test spread/size interaction",
+    "Validate dual-playhead offset calculation"
+  ],
+  "pass_criteria": "Generates stereo output with size-scaled spread offset, moderate stereo width, no clipping"
+}

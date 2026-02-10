@@ -1,0 +1,100 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_dropout",
+  "name": "Dropout/Degradation Effect",
+  "category": "delay_reverb",
+  "description": "Validates that dropout modifier creates tape dropout/degradation effect without completely muting the signal. Tests MOD2 (dropout) behavior.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests dropout/degradation modifier (MOD2)"
+  },
+
+  "stimulus": {
+    "stimulus_id": "noise",
+    "stimulus_variant": "white",
+    "parameters": {
+      "amplitude": 0.5,
+      "duration_seconds": 3.0
+    }
+  },
+
+  "parameter_variations": {},
+
+  "analysis_windows": {
+    "full_response": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Complete dropout cycle"
+    }
+  },
+
+  "expected_invariants": {
+    "signal_still_present": {
+      "metric": "rms_energy",
+      "window": "full_response",
+      "threshold": {
+        "min": -70.0
+      },
+      "severity": "hard_fail",
+      "description": "Dropout should reduce but not eliminate signal"
+    },
+    "variance_from_dropout": {
+      "metric": "rms_variance",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.01,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "Dropout should create amplitude variance"
+    },
+    "no_clipping": {
+      "metric": "peak_level",
+      "window": "full_response",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping despite dropout"
+    },
+    "allows_discontinuities": {
+      "metric": "discontinuity_count",
+      "window": "full_response",
+      "threshold": {
+        "max_count": 10000,
+        "detection_threshold_db": -40.0
+      },
+      "severity": "soft_warn",
+      "description": "Dropout creates intentional discontinuities"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "white_noise.continuous",
+      "scenario_id": "echoform_dropout",
+      "capability_class": "dropout_mod"
+    }
+  },
+
+  "use_cases": [
+    "Verify dropout implementation",
+    "Test tape degradation effect",
+    "Ensure signal not completely muted",
+    "Validate MOD2 behavior"
+  ],
+
+  "pass_criteria": "Creates dropout effect while preserving some signal",
+
+  "example_failures": [
+    "Complete silence → Dropout too aggressive",
+    "No effect → MOD2 not working",
+    "Clipping → Compensation gain issue"
+  ]
+}
