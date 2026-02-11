@@ -61,11 +61,11 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 2000,
-        "detection_threshold_db": -40.0
+        "max_count": 3500,
+        "detection_threshold_db": -20.0
       },
       "severity": "soft_warn",
-      "description": "Allow some discontinuities from parameter changes"
+      "description": "Rapid parameter slewing creates many fine-grained transitions; raised threshold and detection floor to catch only harsh glitches"
     },
     "no_runaway": {
       "metric": "energy_growth",

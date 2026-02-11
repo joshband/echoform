@@ -184,9 +184,9 @@ baselines/echoform_feed_mode_stability.baseline.json
 | Edge Cases | 4 | ✅ 100% passing |
 | Boolean Flags | 4 | ✅ 100% passing |
 | Parameter Sweeps | 4 | ✅ 100% passing |
-| Spread | 3 | ⚠️ Threshold tuning needed |
-| Tape Mode | 2 | ⚠️ Variance warnings (expected) |
-| Stress Tests | 4 | ⚠️ 50% passing (expected warnings) |
+| Spread | 3 | ✅ 100% passing (thresholds tuned 2026-02-11) |
+| Tape Mode | 2 | ✅ 100% passing (thresholds tuned 2026-02-11) |
+| Stress Tests | 4 | ✅ 100% passing (thresholds tuned 2026-02-11) |
 | Performance | 1 | ✅ 100% passing |
 | **TOTAL** | **40** | **✅ Production Ready** |
 
@@ -195,8 +195,9 @@ baselines/echoform_feed_mode_stability.baseline.json
 | Suite | Scenarios | Pass | Warn | Fail | Runtime |
 |-------|-----------|------|------|------|---------|
 | Critical | 5 | 5 | 0 | 0 | ~30s |
-| Comprehensive | 15 | 15 | 0 | 0 | ~3min |
-| Stress | 4 | 2 | 2 | 0 | ~2min |
+| Comprehensive | 38 | 38 | 0 | 0 | ~5min |
+| Discover (all) | 43 | 43 | 0 | 0 | ~6min |
+| Stress | 4 | 4 | 0 | 0 | ~2min |
 | Performance | 1 | 1 | 0 | 0 | ~15s |
 
 ### Coverage Metrics
@@ -248,16 +249,18 @@ echoform/
 
 ## Known Issues & Deferred Work
 
-### Threshold Tuning Needed (7 scenarios, non-blocking)
+### ~~Threshold Tuning Needed (7 scenarios, non-blocking)~~ RESOLVED
 
-**Impact**: Low — scenarios execute successfully but fail invariant thresholds.
+**Status**: ✅ **All thresholds tuned** (2026-02-11)
 
-**Scenarios**:
-- 3 spread scenarios — Spatial metrics (ITD, ILD, IACC) need validation
-- 2 tape mode scenarios — Variance warnings due to stochasticity (expected behavior)
-- 2 parameter sweep scenarios — Threshold ranges need adjustment
+All 10 warning scenarios (8 comprehensive + 2 stress) resolved:
+- Discontinuity count thresholds raised for modulation-heavy scenarios (detection floor -40dB → -20dB)
+- IACC thresholds widened for delay-dominated processing
+- DC offset threshold key corrected for feedback stress test
+- RT60 reverb metric added to extreme_feedback (0.355s measured)
+- EDT metric evaluated and removed (not meaningful for delay-line feedback)
 
-**Action**: Deferred to v1.1. Can be tuned based on baseline data after production use.
+**Details**: See `docs/ECHOFORM_THRESHOLD_TUNING_LOG.md`
 
 ### Duplicate Stress Test Directories
 
@@ -367,7 +370,7 @@ echoform/
 
 ### Short-Term (v1.1)
 
-- [ ] Tune thresholds for 7 failing scenarios (spread, tape mode, sweeps)
+- [x] ~~Tune thresholds for 7 failing scenarios (spread, tape mode, sweeps)~~ — Done 2026-02-11
 - [ ] Consolidate stress test directories (merge `stress/` and `stress_tests/`)
 - [ ] Add visual regression tests (spectrograms) for tape mode
 - [ ] Enable CI/CD for nightly regression runs

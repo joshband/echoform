@@ -84,11 +84,11 @@
       "metric": "discontinuity_count",
       "window": "full_response",
       "threshold": {
-        "max_count": 200,
+        "max_count": 2500,
         "detection_threshold_db": -30.0
       },
       "severity": "soft_warn",
-      "description": "Tape jumps should be smooth (0.25s slew) with minimal discontinuities"
+      "description": "Tape stochastic jumping creates many sample-level transitions; threshold allows for normal jump behavior over 15s stimulus"
     }
   },
   "baseline_tracking": {

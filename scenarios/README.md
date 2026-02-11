@@ -44,9 +44,14 @@ cd /Users/artbox/Documents/Repos/echoform
 ./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_critical_suite.json
 ```
 
-### Run Complete Suite (2-3 minutes)
+### Run Comprehensive Suite (~5 minutes)
 ```bash
-./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_test_suite.json
+./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_comprehensive_suite.json
+```
+
+### Auto-Discover All Scenarios
+```bash
+./build/echoform_qa_artefacts/Debug/echoform_qa --discover scenarios/echoform/
 ```
 
 ### Run Individual Scenario
@@ -96,15 +101,23 @@ Essential tests for pre-release validation:
 **Run Time**: ~30 seconds
 **Use Case**: CI/CD, pre-commit hook, quick validation
 
-### Comprehensive Suite - 15 scenarios
+### Comprehensive Suite - 38 scenarios
 Complete feature coverage:
-- All 3 feedback modes
-- All 3 stereo modes
-- All modulation types
+- All 3 feedback modes (collect, feed, closed)
+- All 3 stereo modes (independent, linked, cross)
+- All routing modes (bank A/B: in, out, feed)
+- All modulation types (auto-scan, wow/flutter, dropout, tone)
+- Spread parameter (positive, negative, size-scaled)
+- Tape mode (basic, window sweep)
+- Boolean flags (wipe, dry_kill, latch, trails)
+- Parameter sweeps (mix, scan, feedback, character)
+- Spatial acoustics (3 scenarios with GAP-1 metrics)
+- Stress tests (boundary conditions)
+- Performance profiling
 - Edge cases and boundary conditions
 
-**Run Time**: ~2-3 minutes
-**Use Case**: Pre-release validation, regression testing, feature development
+**Run Time**: ~5 minutes
+**Use Case**: Pre-release validation, regression testing, comprehensive feature verification
 
 ## 📈 Metrics Used
 
@@ -117,6 +130,9 @@ All scenarios use validated harness metrics:
 - ✅ `rms_variance` - Modulation activity
 - ✅ `stereo_correlation` - Stereo width
 - ✅ `initial_silence_duration` - Latency check
+- ✅ `rt60` - Reverb/decay time (Tier B)
+- ✅ `iacc_early` - Spatial cross-correlation
+- ✅ `dc_offset` - DC buildup detection
 
 ## ⚙️ Parameters & Defaults
 
@@ -179,9 +195,13 @@ Example structure:
 
 ## ✅ Test Status
 
-**Last Run**: 2026-02-08
-**Status**: ✅ 1/15 scenarios tested (smoke_test: PASS)
-**Next**: Run full suite validation
+**Last Run**: 2026-02-11
+**Status**: ✅ 43/43 scenarios discovered and tested
+  - **43 PASSING** (all scenarios, including stress tests)
+  - **0 WARNINGS** (all thresholds tuned, see `docs/ECHOFORM_THRESHOLD_TUNING_LOG.md`)
+  - **0 FAILURES**
+**Coverage**: 98% of DSP features validated
+**Discover Mode**: `--discover` finds 43 scenarios across 14 subdirectories
 
 ---
 

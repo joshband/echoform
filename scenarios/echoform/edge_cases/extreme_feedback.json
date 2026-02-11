@@ -75,6 +75,16 @@
       },
       "severity": "soft_warn",
       "description": "Decay should be very slow but stable"
+    },
+    "rt60_feedback_decay": {
+      "metric": "rt60",
+      "window": "long_tail",
+      "threshold": {
+        "min": 0.1,
+        "max": 5.0
+      },
+      "severity": "soft_warn",
+      "description": "RT60 at 98% feedback measured ~0.35s (delay-line decay, not room reverb); tightened from initial 60.0s max after evaluation"
     }
   },
 

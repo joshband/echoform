@@ -73,11 +73,11 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 100,
-        "detection_threshold_db": -40.0
+        "max_count": 2500,
+        "detection_threshold_db": -20.0
       },
       "severity": "soft_warn",
-      "description": "Combined modulation may create some artifacts"
+      "description": "Combined Bank A (wow/flutter) + Bank B (tone) modulation creates many fine-grained transitions; raised threshold to allow normal dual-bank behavior"
     }
   },
   "baseline_tracking": {

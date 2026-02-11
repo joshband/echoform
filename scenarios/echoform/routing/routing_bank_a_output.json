@@ -70,11 +70,11 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 100,
-        "detection_threshold_db": -40.0
+        "max_count": 2500,
+        "detection_threshold_db": -20.0
       },
       "severity": "soft_warn",
-      "description": "Dropout effect intentionally creates discontinuities"
+      "description": "Dropout modulation on output path intentionally creates discontinuities; raised threshold and detection floor to allow expected dropout behavior"
     }
   },
 

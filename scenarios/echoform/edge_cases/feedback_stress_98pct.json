@@ -70,10 +70,11 @@
       "metric": "dc_offset",
       "window": "late",
       "threshold": {
-        "max_abs_mean": 0.01
+        "max_abs_mean": 0.01,
+        "max": 0.001
       },
       "severity": "soft_warn",
-      "description": "Check for DC buildup from feedback"
+      "description": "Check for DC buildup from 98% feedback; measured ~0.0003 is normal for near-unity feedback with noise stimulus"
     }
   },
 

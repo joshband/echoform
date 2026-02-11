@@ -9,6 +9,7 @@
 #include "../external/qa_harness/scenario_engine/test_suite_executor.h"
 #include "../external/qa_harness/scenario_engine/invariant_evaluator.h"
 #include "../external/qa_harness/runners/in_process_runner.h"
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -190,11 +191,96 @@ int runTestSuite(const std::string& suitePath, bool captureBaseline, bool compar
     return result.passed ? 0 : 1;
 }
 
+int runDiscoverSuite(const std::string& rootDir, bool captureBaseline, bool compareBaseline,
+                     bool enableProfiling)
+{
+    std::cout << "Auto-discovering scenarios in: " << rootDir << "\n";
+
+    // Walk subdirectories since echoform uses nested scenario layout
+    // discoverSuite() is non-recursive, so we call it per subdirectory
+    std::vector<qa::scenario::ScenarioSpec> allScenarios;
+    int dirCount = 0;
+
+    for (const auto& entry : std::filesystem::directory_iterator(rootDir))
+    {
+        if (!entry.is_directory())
+            continue;
+
+        ++dirCount;
+        auto subSuite = qa::scenario::discoverSuite(entry.path());
+        if (subSuite.ok)
+        {
+            for (auto& scenario : subSuite.scenarios)
+                allScenarios.push_back(std::move(scenario));
+        }
+    }
+
+    // Also check top-level .json files
+    auto topLevel = qa::scenario::discoverSuite(std::filesystem::path(rootDir));
+    if (topLevel.ok)
+    {
+        for (auto& scenario : topLevel.scenarios)
+            allScenarios.push_back(std::move(scenario));
+    }
+
+    if (allScenarios.empty())
+    {
+        std::cerr << "ERROR: No scenarios found in " << rootDir << "\n";
+        return 1;
+    }
+
+    // Sort by scenario ID for deterministic ordering
+    std::sort(allScenarios.begin(), allScenarios.end(),
+              [](const auto& a, const auto& b) { return a.id < b.id; });
+
+    std::cout << "Discovered " << allScenarios.size() << " scenarios across " << dirCount
+              << " directories\n";
+
+    // Build a synthetic suite
+    qa::scenario::TestSuite suite;
+    suite.id = "auto_discovered";
+    suite.name = "Auto-Discovered Suite";
+    for (const auto& s : allScenarios)
+        suite.scenarioIds.push_back(s.id);
+
+    // Create execution config
+    qa::scenario::ExecutionConfig config;
+    config.sampleRate = 48000;
+    config.blockSize = 512;
+    config.numChannels = 2;
+    config.outputDir = "qa_output";
+    config.enableProfiling = enableProfiling;
+    config.captureBaseline = captureBaseline;
+    config.compareToBaseline = compareBaseline;
+    config.baselineDir = "baselines";
+    config.baselineTolerance = 5.0;
+    config.baselineVersion = "v1.0.0";
+
+    qa::scenario::ScenarioExecutor scenarioExecutor(makeInProcessRunnerFactory(), createEchoformDut,
+                                                    config);
+
+    qa::scenario::TestSuiteExecutor suiteExecutor(scenarioExecutor);
+
+    qa::scenario::TestSuiteResult result =
+        suiteExecutor.execute(suite, allScenarios, &config);
+
+    std::cout << "\n=== Auto-Discovered Suite Results ===\n";
+    std::cout << "Total: " << result.totalScenarios << "\n";
+    std::cout << "Passed: " << result.passCount << "\n";
+    std::cout << "Warned: " << result.warnCount << "\n";
+    std::cout << "Failed: " << result.failCount << "\n";
+    std::cout << "Skipped: " << result.skipCount << "\n";
+    std::cout << "Errors: " << result.errorCount << "\n";
+
+    return result.passed ? 0 : 1;
+}
+
 void printUsage(const char* programName)
 {
     std::cout << "Usage:\n";
     std::cout << "  " << programName << " <scenario.json>          Run single scenario\n";
     std::cout << "  " << programName << " <suite.json>             Run test suite\n";
+    std::cout << "  " << programName << " --discover <dir>         Auto-discover scenarios\n";
     std::cout << "  " << programName << "                          Run smoke test\n";
     std::cout << "\nOptions:\n";
     std::cout << "  --capture-baseline                   Capture metric baselines\n";
@@ -204,13 +290,14 @@ void printUsage(const char* programName)
     std::cout << "  " << programName << " suite.json --capture-baseline\n";
     std::cout << "  " << programName << " suite.json --compare-baseline\n";
     std::cout << "  " << programName << " perf_suite.json --enable-profiling\n";
+    std::cout << "  " << programName << " --discover scenarios/echoform/\n";
 }
 
 } // namespace
 
 int main(int argc, char** argv)
 {
-    if (argc > 4)
+    if (argc > 5)
     {
         printUsage(argv[0]);
         return 1;
@@ -222,6 +309,7 @@ int main(int argc, char** argv)
         bool captureBaseline = false;
         bool compareBaseline = false;
         bool enableProfiling = false;
+        bool discoverMode = false;
         std::string path;
 
         for (int i = 1; i < argc; ++i)
@@ -239,6 +327,10 @@ int main(int argc, char** argv)
             {
                 enableProfiling = true;
             }
+            else if (arg == "--discover")
+            {
+                discoverMode = true;
+            }
             else if (arg == "--help" || arg == "-h")
             {
                 printUsage(argv[0]);
@@ -248,6 +340,17 @@ int main(int argc, char** argv)
             {
                 path = arg;
             }
+        }
+
+        if (discoverMode)
+        {
+            if (path.empty())
+            {
+                std::cerr << "ERROR: --discover requires a directory path\n";
+                printUsage(argv[0]);
+                return 1;
+            }
+            return runDiscoverSuite(path, captureBaseline, compareBaseline, enableProfiling);
         }
 
         if (!path.empty())

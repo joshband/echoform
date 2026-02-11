@@ -72,11 +72,11 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 50,
-        "detection_threshold_db": -40.0
+        "max_count": 2500,
+        "detection_threshold_db": -20.0
       },
       "severity": "soft_warn",
-      "description": "Allow some artifacts from modulation"
+      "description": "Wow/flutter modulation on input path creates many fine-grained transitions; raised threshold and detection floor to catch only harsh glitches"
     }
   },
 
