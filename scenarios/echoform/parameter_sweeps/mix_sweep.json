@@ -25,12 +25,22 @@
     }
   },
   "parameter_variations": {
-    "Mix": 1.0,
     "Feedback": 0.5,
     "Size": 0.167,
     "Feedback Mode": 0.5,
     "Scan": 0.3
   },
+
+  "parameter_automation": [
+    {
+      "parameter_name": "Mix",
+      "type": "ramp",
+      "start_value": 0.0,
+      "end_value": 1.0,
+      "start_time": 0.5,
+      "end_time": 2.5
+    }
+  ],
   "analysis_windows": {
     "full_response": {
       "type": "time_range",

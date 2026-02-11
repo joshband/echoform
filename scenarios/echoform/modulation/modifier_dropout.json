@@ -70,6 +70,15 @@
       },
       "severity": "soft_warn",
       "description": "Dropout creates intentional discontinuities"
+    },
+    "dropout_flux": {
+      "metric": "flux_rate",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.01
+      },
+      "severity": "soft_warn",
+      "description": "Dropout should cause measurable spectral change over time"
     }
   },
 

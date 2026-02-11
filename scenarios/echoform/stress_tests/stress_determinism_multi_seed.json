@@ -13,6 +13,11 @@
     "amplitude": 0.5,
     "seed": 12345
   },
+  "test_seed": {
+    "stimulus_seed": 12345,
+    "dsp_seed": 12345,
+    "validate_consistency": true
+  },
   "transport": {
     "bpm": 120.0,
     "time_signature_numerator": 4,

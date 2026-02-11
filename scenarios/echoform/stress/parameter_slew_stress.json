@@ -1,5 +1,6 @@
 {
   "scenario_version": "1.0",
+  "threshold_preset": "delay_architecture",
   "id": "stress_parameter_slew",
   "name": "Stress Test: Rapid Parameter Changes",
   "category": "stress_test",
@@ -61,11 +62,10 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 3500,
-        "detection_threshold_db": -20.0
+        "max_count": 3500
       },
       "severity": "soft_warn",
-      "description": "Rapid parameter slewing creates many fine-grained transitions; raised threshold and detection floor to catch only harsh glitches"
+      "description": "Rapid parameter slewing creates many fine-grained transitions; detection_threshold_db inherited from delay_architecture preset"
     },
     "no_runaway": {
       "metric": "energy_growth",

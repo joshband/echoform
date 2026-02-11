@@ -1,5 +1,6 @@
 {
   "scenario_version": "1.0",
+  "threshold_preset": "delay_architecture",
   "id": "stress_buffer_size_extremes",
   "name": "Stress Test: Buffer Size Extremes (Min/Max)",
   "category": "stress_test",
@@ -55,11 +56,10 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 2500,
-        "detection_threshold_db": -20.0
+        "max_count": 2500
       },
       "severity": "soft_warn",
-      "description": "Buffer size extremes can produce sample-level transitions during wraparound; raised threshold and detection floor to allow normal boundary behavior"
+      "description": "Buffer size extremes can produce sample-level transitions during wraparound; detection_threshold_db inherited from delay_architecture preset"
     },
     "no_non_finite": {
       "metric": "non_finite",

@@ -1,7 +1,14 @@
 {
+  "suite_version": "1.0",
   "id": "echoform_comprehensive_suite",
   "name": "Echoform Comprehensive Test Suite",
-  "description": "Complete test coverage for Echoform MemoryDelayEngine - covers all feedback modes, stereo modes, modulation, routing, spatial acoustics, edge cases, and stress tests. 38 scenarios with 98% feature coverage.",
+  "description": "Complete test coverage for Echoform MemoryDelayEngine - covers all feedback modes, stereo modes, modulation, routing, spatial acoustics, edge cases, and stress tests. 39 scenarios with 98% feature coverage.",
+  "default_parameters": {
+    "sample_rate": 48000,
+    "buffer_size": 512,
+    "channels": 2,
+    "duration_seconds": 5.0
+  },
   "scenario_ids": [
     "echoform_smoke_test",
     "echoform_buffer_wraparound",
@@ -16,6 +23,7 @@
     "echoform_wow_flutter",
     "echoform_dropout",
     "modifier_tone_lowpass",
+    "modifier_tone_frequency_response",
     "echoform_size_sweep",
     "echoform_extreme_feedback",
     "feedback_stress_98pct",

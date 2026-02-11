@@ -61,6 +61,24 @@
       },
       "severity": "hard_fail",
       "description": "No NaN/Inf values in output"
+    },
+    "lowpass_centroid": {
+      "metric": "spectral_centroid",
+      "window": "full",
+      "threshold": {
+        "max": 4000.0
+      },
+      "severity": "soft_warn",
+      "description": "Lowpass filter should reduce spectral centroid below 4kHz"
+    },
+    "lowpass_flatness": {
+      "metric": "spectral_flatness",
+      "window": "full",
+      "threshold": {
+        "max": 0.5
+      },
+      "severity": "soft_warn",
+      "description": "Filtered signal should be less spectrally flat (shaped by lowpass)"
     }
   },
 

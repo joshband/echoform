@@ -85,6 +85,26 @@
       },
       "severity": "soft_warn",
       "description": "RT60 at 98% feedback measured ~0.35s (delay-line decay, not room reverb); tightened from initial 60.0s max after evaluation"
+    },
+    "feedback_edt": {
+      "metric": "edt",
+      "window": "long_tail",
+      "threshold": {
+        "min": 0.0,
+        "max": 5.0
+      },
+      "severity": "soft_warn",
+      "description": "Early decay time at extreme feedback. May report 0.0 if decay range is insufficient for Schroeder analysis (delay-line decay vs room reverb)."
+    },
+    "feedback_crest": {
+      "metric": "crest_factor",
+      "window": "long_tail",
+      "threshold": {
+        "min": 3.0,
+        "max": 60.0
+      },
+      "severity": "soft_warn",
+      "description": "Crest factor at 98% feedback. Impulse response produces high crest (~49 dB measured). Wide tolerance for edge-case dynamics."
     }
   },
 

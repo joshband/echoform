@@ -59,6 +59,16 @@
       },
       "severity": "hard_fail",
       "description": "No clipping with cross-feedback"
+    },
+    "pingpong_correlation": {
+      "metric": "correlation_lr",
+      "window": "full_pingpong",
+      "threshold": {
+        "min": 0.0,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "L/R correlation measurement for cross (ping-pong) mode. Mono impulse duplicated to stereo produces correlation~1.0. Metric establishes baseline for regression detection."
     }
   },
   "baseline_tracking": {

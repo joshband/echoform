@@ -1,5 +1,6 @@
 {
   "scenario_version": "1.0",
+  "threshold_preset": "delay_architecture",
   "id": "routing_bank_ab_combination",
   "name": "Routing: Bank A+B Combination",
   "category": "routing_modes",
@@ -73,11 +74,10 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 2500,
-        "detection_threshold_db": -20.0
+        "max_count": 2500
       },
       "severity": "soft_warn",
-      "description": "Combined Bank A (wow/flutter) + Bank B (tone) modulation creates many fine-grained transitions; raised threshold to allow normal dual-bank behavior"
+      "description": "Combined Bank A (wow/flutter) + Bank B (tone) modulation creates many fine-grained transitions; detection_threshold_db inherited from delay_architecture preset"
     }
   },
   "baseline_tracking": {

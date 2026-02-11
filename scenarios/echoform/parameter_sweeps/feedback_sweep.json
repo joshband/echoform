@@ -22,12 +22,22 @@
   },
 
   "parameter_variations": {
-    "Feedback": 0.9183,
     "Mix": 0.7,
     "Size": 0.167,
     "Feedback Mode": 0.5,
     "Scan": 0.1
   },
+
+  "parameter_automation": [
+    {
+      "parameter_name": "Feedback",
+      "type": "ramp",
+      "start_value": 0.1,
+      "end_value": 0.95,
+      "start_time": 0.5,
+      "end_time": 3.5
+    }
+  ],
 
   "analysis_windows": {
     "full_response": {

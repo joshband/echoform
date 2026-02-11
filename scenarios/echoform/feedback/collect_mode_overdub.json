@@ -24,6 +24,29 @@
 
   "parameter_variations": {},
 
+  "multi_pass": {
+    "num_passes": 2,
+    "reset_between_passes": false,
+    "per_pass_invariants": [
+      {
+        "pass": 1,
+        "metric": "rms_db",
+        "threshold": { "min": -40.0 },
+        "severity": "hard_fail",
+        "window": "full_accumulation",
+        "description": "First pass: initial capture — signal should be audible"
+      },
+      {
+        "pass": 2,
+        "metric": "rms_db",
+        "threshold": { "min": -35.0 },
+        "severity": "soft_warn",
+        "window": "full_accumulation",
+        "description": "Second pass: overdub accumulation — energy should grow from first pass"
+      }
+    ]
+  },
+
   "analysis_windows": {
     "full_accumulation": {
       "type": "time_range",

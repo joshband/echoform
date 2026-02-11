@@ -23,6 +23,17 @@
 
   "parameter_variations": {},
 
+  "parameter_automation": [
+    {
+      "parameter_name": "Scan",
+      "type": "lfo",
+      "waveform": "triangle",
+      "rate_hz": 0.25,
+      "depth": 0.4,
+      "center": 0.5
+    }
+  ],
+
   "analysis_windows": {
     "full_modulation": {
       "type": "time_range",
@@ -76,6 +87,25 @@
       },
       "severity": "hard_fail",
       "description": "No clipping during modulation"
+    },
+    "scan_flux": {
+      "metric": "flux_rate",
+      "window": "steady_modulation",
+      "threshold": {
+        "min": 0.005
+      },
+      "severity": "soft_warn",
+      "description": "LFO scan should cause measurable spectral movement"
+    },
+    "scan_centroid": {
+      "metric": "spectral_centroid",
+      "window": "steady_modulation",
+      "threshold": {
+        "min": 100.0,
+        "max": 10000.0
+      },
+      "severity": "soft_warn",
+      "description": "Spectral centroid should be in audible range during scan modulation"
     }
   },
 

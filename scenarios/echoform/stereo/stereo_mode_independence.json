@@ -61,6 +61,16 @@
       },
       "severity": "soft_warn",
       "description": "Stable processing per channel"
+    },
+    "channel_decorrelation": {
+      "metric": "correlation_lr",
+      "window": "full_response",
+      "threshold": {
+        "min": 0.0,
+        "max": 1.0
+      },
+      "severity": "soft_warn",
+      "description": "L/R correlation measurement for independent mode. Mono stimulus duplicated to stereo produces correlation~1.0. Metric establishes baseline for regression detection."
     }
   },
   "baseline_tracking": {

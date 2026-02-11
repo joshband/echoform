@@ -72,6 +72,15 @@
       },
       "severity": "soft_warn",
       "description": "Allow some texture but no harsh artifacts"
+    },
+    "modulation_flux": {
+      "metric": "flux_rate",
+      "window": "full_modulation",
+      "threshold": {
+        "min": 0.01
+      },
+      "severity": "soft_warn",
+      "description": "Wow/flutter modulation should cause measurable spectral change"
     }
   },
 

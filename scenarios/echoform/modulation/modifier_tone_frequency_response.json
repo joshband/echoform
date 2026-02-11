@@ -1,0 +1,84 @@
+{
+  "scenario_version": "1.0",
+  "id": "modifier_tone_frequency_response",
+  "name": "Tone Modifier Frequency Response",
+  "category": "modulation",
+  "description": "Validates MOD3 lowpass filter frequency response using sweep stimulus and frequency_response metric. Expects high-frequency attenuation when tone is engaged at 80%. GAP-16 feature adoption.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Tests tone modifier (MOD3) frequency response via FFT transfer function"
+  },
+
+  "threshold_preset": "delay_architecture",
+
+  "stimulus": {
+    "stimulus_id": "sweep",
+    "stimulus_variant": "log_sine",
+    "parameters": {
+      "start_freq_hz": 20.0,
+      "end_freq_hz": 20000.0,
+      "duration_seconds": 5.0,
+      "amplitude": 0.5
+    }
+  },
+
+  "parameter_variations": {
+    "Mix": 1.0,
+    "Character": 1.0,
+    "Feedback": 0.0,
+    "Size": 0.001,
+    "Bank A Mod 3 (Tone)": 0.8,
+    "Always Record": 1.0
+  },
+
+  "expected_invariants": {
+    "tone_filter_response": {
+      "metric": "frequency_response",
+      "severity": "soft_warn",
+      "threshold": {
+        "frequencies": [100, 500, 1000, 2000, 5000, 10000],
+        "expected_db": [0, 0, -1, -3, -10, -20],
+        "tolerance_db": 6.0
+      },
+      "window": "full",
+      "description": "Lowpass filter should attenuate high frequencies. Wide 6dB tolerance for initial baseline — tighten after golden capture."
+    },
+    "lowpass_centroid": {
+      "metric": "spectral_centroid",
+      "window": "full",
+      "threshold": {
+        "max": 5000.0
+      },
+      "severity": "soft_warn",
+      "description": "Lowpass should reduce spectral centroid below 5kHz"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "stimulus_id": "sweep.logarithmic",
+      "scenario_id": "modifier_tone_frequency_response",
+      "capability_class": "tone_modifier_freq_response"
+    }
+  },
+
+  "use_cases": [
+    "Validate MOD3 tone modifier frequency response",
+    "Test lowpass filter shape via FFT transfer function",
+    "Verify high-frequency attenuation",
+    "Regression detection for filter algorithm changes"
+  ],
+
+  "pass_criteria": "Frequency response matches lowpass filter shape with high-frequency attenuation",
+
+  "example_failures": [
+    "Flat response → Tone filter not engaged",
+    "High centroid → Filter not attenuating highs",
+    "Wrong cutoff → Filter frequency incorrect"
+  ]
+}

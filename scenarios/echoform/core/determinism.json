@@ -25,6 +25,12 @@
 
   "parameter_variations": {},
 
+  "test_seed": {
+    "stimulus_seed": 42,
+    "dsp_seed": 42,
+    "validate_consistency": true
+  },
+
   "analysis_windows": {
     "full_render": {
       "type": "time_range",

@@ -70,6 +70,25 @@
       },
       "severity": "hard_fail",
       "description": "Self-sustaining loop must not clip"
+    },
+    "loop_dynamic_range": {
+      "metric": "dynamic_range",
+      "window": "full_cycle",
+      "threshold": {
+        "min": 6.0
+      },
+      "severity": "soft_warn",
+      "description": "Self-sustaining closed loop should have meaningful dynamic range"
+    },
+    "loop_crest_factor": {
+      "metric": "crest_factor",
+      "window": "full_cycle",
+      "threshold": {
+        "min": 3.0,
+        "max": 50.0
+      },
+      "severity": "soft_warn",
+      "description": "Crest factor validates dynamic behavior of isolated loop. Impulse stimulus produces high crest (~41 dB measured)."
     }
   },
 

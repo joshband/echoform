@@ -1,5 +1,6 @@
 {
   "scenario_version": "1.0",
+  "threshold_preset": "delay_architecture",
   "id": "routing_bank_a_input",
   "name": "Routing: Bank A Input Path",
   "category": "routing_modes",
@@ -72,11 +73,10 @@
       "metric": "discontinuity_count",
       "window": "full",
       "threshold": {
-        "max_count": 2500,
-        "detection_threshold_db": -20.0
+        "max_count": 2500
       },
       "severity": "soft_warn",
-      "description": "Wow/flutter modulation on input path creates many fine-grained transitions; raised threshold and detection floor to catch only harsh glitches"
+      "description": "Wow/flutter modulation on input path creates many fine-grained transitions; detection_threshold_db inherited from delay_architecture preset"
     }
   },
 

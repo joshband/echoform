@@ -20,9 +20,11 @@ scenarios/
 │   │   ├── stereo_mode_linked.json       ✅ Linked playheads
 │   │   └── stereo_mode_cross.json        ✅ Ping-pong
 │   ├── modulation/            # Modulation tests
-│   │   ├── auto_scan_modulation.json  ✅ LFO scan
-│   │   ├── modifier_wow_flutter.json  ✅ Tape wow/flutter
-│   │   └── modifier_dropout.json      ✅ Tape dropout
+│   │   ├── auto_scan_modulation.json           ✅ LFO scan
+│   │   ├── modifier_tone_lowpass.json          ✅ MOD3 tone filter
+│   │   ├── modifier_tone_frequency_response.json ✅ Tone freq response (Phase 5.5)
+│   │   ├── modifier_wow_flutter.json           ✅ Tape wow/flutter
+│   │   └── modifier_dropout.json               ✅ Tape dropout
 │   └── edge_cases/            # Edge case tests
 │       ├── size_parameter_sweep.json  ✅ Size crossfading
 │       ├── extreme_feedback.json      ✅ 98% feedback stability
@@ -101,7 +103,7 @@ Essential tests for pre-release validation:
 **Run Time**: ~30 seconds
 **Use Case**: CI/CD, pre-commit hook, quick validation
 
-### Comprehensive Suite - 38 scenarios
+### Comprehensive Suite - 39 scenarios
 Complete feature coverage:
 - All 3 feedback modes (collect, feed, closed)
 - All 3 stereo modes (independent, linked, cross)
@@ -123,7 +125,8 @@ Complete feature coverage:
 
 All scenarios use validated harness metrics:
 - ✅ `signal_present` - Audio output verification
-- ✅ `peak_level` - Clipping detection
+- ✅ `peak_level` - Clipping detection (also auto-injected by HO-11)
+- ✅ `non_finite` - NaN/Inf detection (auto-injected by HO-11)
 - ✅ `monotonic_tail_decay` - Stability validation
 - ✅ `discontinuity_count` - Artifact detection
 - ✅ `energy_growth` - Feedback stability
@@ -133,6 +136,14 @@ All scenarios use validated harness metrics:
 - ✅ `rt60` - Reverb/decay time (Tier B)
 - ✅ `iacc_early` - Spatial cross-correlation
 - ✅ `dc_offset` - DC buildup detection
+- ✅ `frequency_response` - FFT transfer function (Phase 5.5)
+- ✅ `spectral_centroid` - Frequency content center (Phase 5.5)
+- ✅ `spectral_flatness` - Spectral shape (Phase 5.5)
+- ✅ `flux_rate` - Spectral change rate (Phase 5.5)
+- ✅ `dynamic_range` - Dynamic range (Phase 5.5)
+- ✅ `crest_factor` - Peak-to-RMS ratio (Phase 5.5)
+- ✅ `correlation_lr` - L/R channel correlation (Phase 5.5)
+- ✅ `edt` - Early decay time (Phase 5.5)
 
 ## ⚙️ Parameters & Defaults
 
@@ -195,13 +206,14 @@ Example structure:
 
 ## ✅ Test Status
 
-**Last Run**: 2026-02-11
-**Status**: ✅ 43/43 scenarios discovered and tested
-  - **43 PASSING** (all scenarios, including stress tests)
-  - **0 WARNINGS** (all thresholds tuned, see `docs/ECHOFORM_THRESHOLD_TUNING_LOG.md`)
+**Last Run**: 2026-02-11 (Phase 5.5 Session B)
+**Status**: ✅ 41/41 discovered scenarios tested
+  - **40 PASSING**
+  - **1 WARNING** (modifier_tone_frequency_response — frequency_response metric needs dry capture)
   - **0 FAILURES**
 **Coverage**: 98% of DSP features validated
-**Discover Mode**: `--discover` finds 43 scenarios across 14 subdirectories
+**Discover Mode**: `--discover` finds 41 scenarios across 14 subdirectories
+**Phase 5.5 Adoption**: frequency_response, multi_pass, 8 spectral metrics, parameter_automation (LFO/Ramp), test_seed, suite default_parameters
 
 ---
 
