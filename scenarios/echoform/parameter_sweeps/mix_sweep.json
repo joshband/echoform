@@ -34,11 +34,18 @@
   "parameter_automation": [
     {
       "parameter_name": "Mix",
-      "type": "ramp",
-      "start_value": 0.0,
-      "end_value": 1.0,
-      "start_time": 0.5,
-      "end_time": 2.5
+      "parameter_index": 0,
+      "type": "envelope",
+      "points": [
+        {
+          "time": 0.5,
+          "value": 0.0
+        },
+        {
+          "time": 2.5,
+          "value": 1.0
+        }
+      ]
     }
   ],
   "analysis_windows": {

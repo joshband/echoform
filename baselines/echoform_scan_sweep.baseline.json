@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "has_output": -26.285850524902344,
+    "high_variance": 0.00022393511467534174,
+    "no_clipping": -14.73414421081543,
+    "no_excessive_discontinuities": 2999.0
+  },
+  "metrics": {
+    "discontinuity_count": 2999.0,
+    "non_finite": 0.0,
+    "peak_level": -14.73414421081543,
+    "rms_energy": -26.285850524902344,
+    "rms_variance": 0.00022393511467534174
+  },
+  "scenario_id": "echoform_scan_sweep",
+  "timestamp": "2026-02-13T17:05:00Z",
+  "version": "v1.0.0"
+}

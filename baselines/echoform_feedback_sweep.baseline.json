@@ -1,0 +1,20 @@
+{
+  "invariants": {
+    "controlled_decay": 0.0,
+    "default_non_finite": 0.0,
+    "early_strong": -65.94231414794922,
+    "no_clipping": -20.915149688720703,
+    "stable_feedback": 4.506339087101185e-40,
+    "sustained_energy": -180.0
+  },
+  "metrics": {
+    "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -20.915149688720703,
+    "rms_energy": -180.0,
+    "rms_variance": 4.506339087101185e-40
+  },
+  "scenario_id": "echoform_feedback_sweep",
+  "timestamp": "2026-02-13T17:05:00Z",
+  "version": "v1.0.0"
+}

@@ -1,0 +1,21 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "hall_reverb": -14.454604148864746,
+    "modulation_present": 0.0004097873183415895,
+    "no_clipping": -5.594515323638916,
+    "smooth_modulation": 3999.0,
+    "spatial_correlation": 0.9224580847077672
+  },
+  "metrics": {
+    "discontinuity_count": 3999.0,
+    "iacc_early": 0.9224580847077672,
+    "non_finite": 0.0,
+    "peak_level": -5.594515323638916,
+    "rms_energy": -14.454604148864746,
+    "rms_variance": 0.0004097873183415895
+  },
+  "scenario_id": "echoform_tape_mode_hall_ambience",
+  "timestamp": "2026-02-13T17:05:01Z",
+  "version": "v1.0.0"
+}

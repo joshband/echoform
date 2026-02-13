@@ -1,19 +1,18 @@
 {
   "invariants": {
     "default_non_finite": 0.0,
+    "has_output": -180.0,
+    "low_rms_tail": -180.0,
     "no_clipping": -180.0,
-    "no_excessive_discontinuities": 499.0,
-    "output_present": -180.0,
-    "stable_output": 0.0
+    "short_decay": 0.0
   },
   "metrics": {
-    "discontinuity_count": 499.0,
     "monotonic_tail_decay": 0.0,
     "non_finite": 0.0,
     "peak_level": -180.0,
     "rms_energy": -180.0
   },
-  "scenario_id": "echoform_buffer_wraparound",
-  "timestamp": "2026-02-13T17:04:58Z",
+  "scenario_id": "echoform_wipe_mode",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

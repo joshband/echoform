@@ -1,11 +1,19 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "no_clipping": -6.6724348068237305,
+    "signal_sustained": -10.715978622436523,
+    "smooth_transitions": 3999.0,
+    "stable_processing": 0.0
+  },
   "metrics": {
     "discontinuity_count": 3999.0,
     "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
     "peak_level": -6.6724348068237305,
     "rms_energy": -10.715978622436523
   },
   "scenario_id": "echoform_size_sweep",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

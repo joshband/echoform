@@ -1,11 +1,19 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "energy_increases": 11.553001403808594,
+    "no_clipping_despite_accumulation": -14.777179718017578,
+    "signal_sustained": -55.72309112548828,
+    "smooth_accumulation": 1999.0
+  },
   "metrics": {
     "discontinuity_count": 1999.0,
-    "energy_growth": 8.52348804473877,
-    "peak_level": -14.799713134765625,
-    "rms_energy": -55.6843376159668
+    "energy_growth": 11.553001403808594,
+    "non_finite": 0.0,
+    "peak_level": -14.777179718017578,
+    "rms_energy": -55.72309112548828
   },
   "scenario_id": "echoform_collect_overdub",
-  "timestamp": "2026-02-10T04:53:37Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

@@ -1,11 +1,23 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "modulation_active": 1.870412687015537e-06,
+    "no_clipping": -8.495111465454102,
+    "rms_energy": -16.523426055908203,
+    "scan_centroid": 11830.7275390625,
+    "scan_flux": 486.5252685546875,
+    "smooth_modulation": 3999.0
+  },
   "metrics": {
     "discontinuity_count": 3999.0,
-    "peak_level": -8.258004188537598,
-    "rms_energy": -16.439285278320313,
-    "rms_variance": 1.9953184329743777e-06
+    "flux_rate": 486.5252685546875,
+    "non_finite": 0.0,
+    "peak_level": -8.495111465454102,
+    "rms_energy": -16.523426055908203,
+    "rms_variance": 1.870412687015537e-06,
+    "spectral_centroid": 11830.7275390625
   },
   "scenario_id": "echoform_auto_scan_modulation",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

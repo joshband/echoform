@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "has_signal": -180.0,
+    "no_clipping": -180.0,
+    "smooth_transitions": 1999.0,
+    "temporal_variance": 0.0
+  },
+  "metrics": {
+    "discontinuity_count": 1999.0,
+    "non_finite": 0.0,
+    "peak_level": -180.0,
+    "rms_energy": -180.0,
+    "rms_variance": 0.0
+  },
+  "scenario_id": "echoform_tape_mode_basic",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

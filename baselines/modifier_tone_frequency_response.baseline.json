@@ -1,0 +1,17 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "default_peak_level": -10.805602073669434,
+    "lowpass_centroid": 786.0086059570313,
+    "lowpass_flatness": 0.07495187968015671
+  },
+  "metrics": {
+    "non_finite": 0.0,
+    "peak_level": -10.805602073669434,
+    "spectral_centroid": 786.0086059570313,
+    "spectral_flatness": 0.07495187968015671
+  },
+  "scenario_id": "modifier_tone_frequency_response",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

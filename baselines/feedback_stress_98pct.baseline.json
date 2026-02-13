@@ -1,0 +1,17 @@
+{
+  "invariants": {
+    "dc_offset_check": 0.0002672187110874802,
+    "energy_present": -30.38006019592285,
+    "no_non_finite": 0.0,
+    "no_runaway": -21.81460189819336
+  },
+  "metrics": {
+    "dc_offset": 0.0002672187110874802,
+    "non_finite": 0.0,
+    "peak_level": -21.81460189819336,
+    "rms_energy": -30.38006019592285
+  },
+  "scenario_id": "feedback_stress_98pct",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

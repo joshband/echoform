@@ -1,0 +1,21 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "feedback_modulation": 4.171800276470518e-16,
+    "feedback_stable": 0.0,
+    "general_decay": 0.0,
+    "no_clipping": -16.478174209594727,
+    "rms_energy": -65.86272430419922
+  },
+  "metrics": {
+    "energy_growth": 0.0,
+    "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -16.478174209594727,
+    "rms_energy": -65.86272430419922,
+    "rms_variance": 4.171800276470518e-16
+  },
+  "scenario_id": "routing_bank_a_feed",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

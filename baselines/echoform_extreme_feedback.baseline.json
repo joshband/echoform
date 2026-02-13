@@ -1,11 +1,25 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "feedback_crest": 49.42394256591797,
+    "feedback_edt": 0.0,
+    "no_clipping": -12.041200637817383,
+    "no_runaway": 0.0,
+    "rt60_feedback_decay": 0.35486511823870776,
+    "slow_decay": 0.0,
+    "sustained_signal": -61.465145111083984
+  },
   "metrics": {
+    "crest_factor": 49.42394256591797,
+    "edt": 0.0,
     "energy_growth": 0.0,
     "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
     "peak_level": -12.041200637817383,
-    "rms_energy": -61.465145111083984
+    "rms_energy": -61.465145111083984,
+    "rt60": 0.35486511823870776
   },
   "scenario_id": "echoform_extreme_feedback",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

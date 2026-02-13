@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "no_clipping": -7.32560396194458,
+    "spatial_output": -25.49270248413086,
+    "stable_decay": 3.0,
+    "stereo_imaging": 1.2008619402514829
+  },
+  "metrics": {
+    "ild_max_db": 1.2008619402514829,
+    "monotonic_tail_decay": 3.0,
+    "non_finite": 0.0,
+    "peak_level": -7.32560396194458,
+    "rms_energy": -25.49270248413086
+  },
+  "scenario_id": "echoform_spatial_feedback_decay",
+  "timestamp": "2026-02-13T17:05:00Z",
+  "version": "v1.0.0"
+}

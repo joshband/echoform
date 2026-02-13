@@ -1,10 +1,17 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "feedback_stability": 0.0,
+    "monotonic_decay": 0.0,
+    "no_clipping": -7.958800315856934
+  },
   "metrics": {
     "energy_growth": 0.0,
     "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
     "peak_level": -7.958800315856934
   },
   "scenario_id": "echoform_feed_mode_stability",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

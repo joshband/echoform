@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "modulation_activity": 9.952743884396931e-05,
+    "no_clipping": -2.828131675720215,
+    "no_excessive_discontinuities": 1999.0,
+    "rms_energy": -8.599624633789063
+  },
+  "metrics": {
+    "discontinuity_count": 1999.0,
+    "non_finite": 0.0,
+    "peak_level": -2.828131675720215,
+    "rms_energy": -8.599624633789063,
+    "rms_variance": 9.952743884396931e-05
+  },
+  "scenario_id": "routing_bank_a_input",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

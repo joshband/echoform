@@ -1,10 +1,19 @@
 {
+  "invariants": {
+    "both_channels_active": -9.351518630981445,
+    "channel_decorrelation": 1.0,
+    "default_non_finite": 0.0,
+    "no_clipping": -4.323004245758057,
+    "stable_output": 2.0
+  },
   "metrics": {
+    "correlation_lr": 1.0,
     "monotonic_tail_decay": 2.0,
+    "non_finite": 0.0,
     "peak_level": -4.323004245758057,
     "rms_energy": -9.351518630981445
   },
   "scenario_id": "echoform_stereo_independence",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

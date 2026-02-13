@@ -1,0 +1,21 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "no_clipping": -19.19736099243164,
+    "pingpong_output": -54.89622497558594,
+    "spatial_width": 0.14583333333333334,
+    "stable_feedback": 0.0,
+    "stereo_separation": 0.5490963209232903
+  },
+  "metrics": {
+    "iacc_late": 0.5490963209232903,
+    "itd_max_ms": 0.14583333333333334,
+    "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -19.19736099243164,
+    "rms_energy": -54.89622497558594
+  },
+  "scenario_id": "echoform_cross_stereo_small_room",
+  "timestamp": "2026-02-13T17:05:02Z",
+  "version": "v1.0.0"
+}

@@ -27,7 +27,8 @@
     "Mix": 0.7,
     "Feedback": 0.6,
     "Size": 0.167,
-    "Feedback Mode": 0.5
+    "Feedback Mode": 0.5,
+    "Random Seed": 0.0421
   },
 
   "analysis_windows": {

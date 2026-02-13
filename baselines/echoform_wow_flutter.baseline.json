@@ -1,11 +1,21 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "modulation_flux": 210.8301544189453,
+    "modulation_present": 0.0006136824218533487,
+    "no_clipping": -6.6724348068237305,
+    "signal_audible": -10.947941780090332,
+    "smooth_enough": 2999.0
+  },
   "metrics": {
     "discontinuity_count": 2999.0,
+    "flux_rate": 210.8301544189453,
+    "non_finite": 0.0,
     "peak_level": -6.6724348068237305,
     "rms_energy": -10.947941780090332,
     "rms_variance": 0.0006136824218533487
   },
   "scenario_id": "echoform_wow_flutter",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

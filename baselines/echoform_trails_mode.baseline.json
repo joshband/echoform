@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "early_reflections": -51.11079406738281,
+    "has_wet_tail": -54.12109375,
+    "late_decay": -180.0,
+    "natural_decay": 0.0,
+    "no_clipping": -4.43697452545166
+  },
+  "metrics": {
+    "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -4.43697452545166,
+    "rms_energy": -180.0
+  },
+  "scenario_id": "echoform_trails_mode",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

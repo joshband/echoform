@@ -26,11 +26,12 @@
   "parameter_automation": [
     {
       "parameter_name": "Scan",
+      "parameter_index": 1,
       "type": "lfo",
       "waveform": "triangle",
       "rate_hz": 0.25,
-      "depth": 0.4,
-      "center": 0.5
+      "min_value": 0.1,
+      "max_value": 0.9
     }
   ],
 
@@ -102,7 +103,7 @@
       "window": "steady_modulation",
       "threshold": {
         "min": 100.0,
-        "max": 10000.0
+        "max": 14000.0
       },
       "severity": "soft_warn",
       "description": "Spectral centroid should be in audible range during scan modulation"

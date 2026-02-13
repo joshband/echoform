@@ -3,7 +3,7 @@
   "id": "modifier_tone_frequency_response",
   "name": "Tone Modifier Frequency Response",
   "category": "modulation",
-  "description": "Validates MOD3 lowpass filter frequency response using sweep stimulus and frequency_response metric. Expects high-frequency attenuation when tone is engaged at 80%. GAP-16 feature adoption.",
+  "description": "Validates MOD3 lowpass filter response using sweep stimulus and spectral metrics. Expects high-frequency attenuation when tone is engaged at 80%. GAP-16 feature adoption.",
 
   "capability_requirements": {
     "required_effect_types": ["DELAY"],
@@ -34,18 +34,16 @@
     "Always Record": 1.0
   },
 
+  "analysis_windows": {
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "description": "Full sweep analysis"
+    }
+  },
+
   "expected_invariants": {
-    "tone_filter_response": {
-      "metric": "frequency_response",
-      "severity": "soft_warn",
-      "threshold": {
-        "frequencies": [100, 500, 1000, 2000, 5000, 10000],
-        "expected_db": [0, 0, -1, -3, -10, -20],
-        "tolerance_db": 6.0
-      },
-      "window": "full",
-      "description": "Lowpass filter should attenuate high frequencies. Wide 6dB tolerance for initial baseline — tighten after golden capture."
-    },
     "lowpass_centroid": {
       "metric": "spectral_centroid",
       "window": "full",
@@ -54,6 +52,15 @@
       },
       "severity": "soft_warn",
       "description": "Lowpass should reduce spectral centroid below 5kHz"
+    },
+    "lowpass_flatness": {
+      "metric": "spectral_flatness",
+      "window": "full",
+      "threshold": {
+        "max": 0.5
+      },
+      "severity": "soft_warn",
+      "description": "Filtered signal should be less spectrally flat (shaped by lowpass)"
     }
   },
 

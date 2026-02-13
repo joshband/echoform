@@ -1,0 +1,17 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "no_clipping": -12.041200637817383,
+    "rms_energy": -61.465145111083984,
+    "time_delay_present": 0.0
+  },
+  "metrics": {
+    "itd_max_ms": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -12.041200637817383,
+    "rms_energy": -61.465145111083984
+  },
+  "scenario_id": "spread_positive_offset",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

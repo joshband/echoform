@@ -1,11 +1,23 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "loop_crest_factor": 40.89091873168945,
+    "loop_dynamic_range": 71.29749298095703,
+    "no_clipping": -10.446200370788574,
+    "no_runaway": 8.02115249633789,
+    "stable_feedback": 7.0,
+    "sustained_loop": -51.337120056152344
+  },
   "metrics": {
+    "crest_factor": 40.89091873168945,
+    "dynamic_range": 71.29749298095703,
     "energy_growth": 8.02115249633789,
     "monotonic_tail_decay": 7.0,
+    "non_finite": 0.0,
     "peak_level": -10.446200370788574,
     "rms_energy": -51.337120056152344
   },
   "scenario_id": "echoform_closed_mode_isolation",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

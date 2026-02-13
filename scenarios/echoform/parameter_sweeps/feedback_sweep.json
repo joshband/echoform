@@ -25,17 +25,25 @@
     "Mix": 0.7,
     "Size": 0.167,
     "Feedback Mode": 0.5,
-    "Scan": 0.1
+    "Scan": 0.1,
+    "Random Seed": 0.0421
   },
 
   "parameter_automation": [
     {
       "parameter_name": "Feedback",
-      "type": "ramp",
-      "start_value": 0.1,
-      "end_value": 0.95,
-      "start_time": 0.5,
-      "end_time": 3.5
+      "parameter_index": 4,
+      "type": "envelope",
+      "points": [
+        {
+          "time": 0.5,
+          "value": 0.1
+        },
+        {
+          "time": 3.5,
+          "value": 0.95
+        }
+      ]
     }
   ],
 

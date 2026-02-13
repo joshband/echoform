@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "iacc_stereo_field": 0.9999999999999997,
+    "no_clipping": -3.8561620712280273,
+    "rms_energy": -10.231176376342773,
+    "time_delay_moderate": 0.0
+  },
+  "metrics": {
+    "iacc_early": 0.9999999999999997,
+    "itd_max_ms": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -3.8561620712280273,
+    "rms_energy": -10.231176376342773
+  },
+  "scenario_id": "spread_size_scaling",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

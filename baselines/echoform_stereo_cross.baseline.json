@@ -1,10 +1,19 @@
 {
+  "invariants": {
+    "default_non_finite": 0.0,
+    "no_clipping": -9.11863899230957,
+    "pingpong_correlation": 1.0,
+    "stable_feedback": 0.0,
+    "sustained_output": -58.59138107299805
+  },
   "metrics": {
+    "correlation_lr": 1.0,
     "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
     "peak_level": -9.11863899230957,
     "rms_energy": -58.59138107299805
   },
   "scenario_id": "echoform_stereo_cross",
-  "timestamp": "2026-02-10T04:53:38Z",
+  "timestamp": "2026-02-13T17:04:59Z",
   "version": "v1.0.0"
 }

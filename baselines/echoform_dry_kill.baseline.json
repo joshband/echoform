@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "feedback_active": 2.8233201429375534e-06,
+    "no_clipping": -17.47531509399414,
+    "sustained_energy": 0.0,
+    "wet_signal_present": -29.674158096313477
+  },
+  "metrics": {
+    "monotonic_tail_decay": 0.0,
+    "non_finite": 0.0,
+    "peak_level": -17.47531509399414,
+    "rms_energy": -29.674158096313477,
+    "rms_variance": 2.8233201429375534e-06
+  },
+  "scenario_id": "echoform_dry_kill",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}

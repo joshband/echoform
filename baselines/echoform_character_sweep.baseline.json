@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "default_non_finite": 0.0,
+    "expected_discontinuities": 1999.0,
+    "has_output": -180.0,
+    "high_variance": 0.0,
+    "no_clipping": -180.0
+  },
+  "metrics": {
+    "discontinuity_count": 1999.0,
+    "non_finite": 0.0,
+    "peak_level": -180.0,
+    "rms_energy": -180.0,
+    "rms_variance": 0.0
+  },
+  "scenario_id": "echoform_character_sweep",
+  "timestamp": "2026-02-13T17:05:00Z",
+  "version": "v1.0.0"
+}

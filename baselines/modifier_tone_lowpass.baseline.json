@@ -1,0 +1,19 @@
+{
+  "invariants": {
+    "lowpass_centroid": 872.1259155273438,
+    "lowpass_flatness": 0.007297329604625702,
+    "no_clipping": -6.849799156188965,
+    "signal_present": -14.599218368530273,
+    "stable_output": 0.0
+  },
+  "metrics": {
+    "non_finite": 0.0,
+    "peak_level": -6.849799156188965,
+    "rms_energy": -14.599218368530273,
+    "spectral_centroid": 872.1259155273438,
+    "spectral_flatness": 0.007297329604625702
+  },
+  "scenario_id": "modifier_tone_lowpass",
+  "timestamp": "2026-02-13T17:04:59Z",
+  "version": "v1.0.0"
+}
