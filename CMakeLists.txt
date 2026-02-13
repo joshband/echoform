@@ -83,6 +83,11 @@ endif()
 # QA Harness Integration
 option(ENABLE_QA_HARNESS "Build QA harness tests" ON)
 if(ENABLE_QA_HARNESS)
+    # Find CURL (required by JUCE on Linux)
+    if(UNIX AND NOT APPLE)
+        find_package(CURL REQUIRED)
+    endif()
+
     # Add harness as subdirectory
     add_subdirectory(external/qa_harness EXCLUDE_FROM_ALL)
 
@@ -112,6 +117,11 @@ if(ENABLE_QA_HARNESS)
         juce::juce_core
         juce::juce_dsp
     )
+
+    # Link CURL on Linux (JUCE dependency)
+    if(UNIX AND NOT APPLE)
+        target_link_libraries(echoform_qa PRIVATE CURL::libcurl)
+    endif()
 
     # Add CTest integration
     add_test(NAME echoform_qa COMMAND echoform_qa)
