@@ -1,0 +1,62 @@
+name: DSP QA - Critical Suite
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  harness-critical:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build_qa \
+            -DENABLE_QA_HARNESS=ON \
+            -DBUILD_QA_TESTS=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build QA harness
+        run: cmake --build build_qa --target echoform_qa -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+      - name: Run critical suite
+        run: |
+          cd build_qa
+          ./echoform_qa ../scenarios/echoform_critical_suite.json
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-critical-output-${{ matrix.os }}
+          path: qa_output/
+          retention-days: 7
+
+      - name: Comment on PR (failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **DSP QA Critical Suite Failed**\n\nPlease check the workflow logs and uploaded artifacts for details.\n\nSee [TESTING.md](https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/blob/main/TESTING.md) for troubleshooting guide.'
+            })

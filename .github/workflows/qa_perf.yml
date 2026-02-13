@@ -1,0 +1,47 @@
+name: DSP QA - Performance Profiling
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+jobs:
+  harness-perf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Configure CMake (optimized build)
+        run: |
+          cmake -B build_qa \
+            -DENABLE_QA_HARNESS=ON \
+            -DBUILD_QA_TESTS=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-O3 -march=native"
+
+      - name: Build QA harness
+        run: cmake --build build_qa --target echoform_qa -j$(nproc)
+
+      - name: Run performance suite
+        run: |
+          cd build_qa
+          ./echoform_qa ../scenarios/echoform_performance_suite.json
+        continue-on-error: true
+
+      - name: Upload performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-perf-reports
+          path: qa_output/performance/
+          retention-days: 90

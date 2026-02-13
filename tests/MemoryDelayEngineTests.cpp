@@ -1,6 +1,10 @@
 // ============================================================================
 // DEPRECATED: These tests have been migrated to the QA harness
 //
+// deprecated_by: audio-dsp-qa-harness scenarios (echoform_critical_suite.json)
+// sunset_date: 2026-03-15
+// replacement: ./build_qa/echoform_qa ../scenarios/echoform_critical_suite.json
+//
 // This file is kept for reference and backward compatibility only.
 // New tests should be added as JSON scenarios in scenarios/echoform/
 //
@@ -8,7 +12,13 @@
 // - testWraparoundDsp()   → scenarios/echoform/core/buffer_wraparound.json
 // - testCollectOverdub()  → scenarios/echoform/feedback/collect_mode_overdub.json
 //
-// See: docs/echoform_qa_catalog.md for complete QA infrastructure details
+// Authority status:
+// - This test is NO LONGER RUN in CI (ENABLE_TESTS=OFF by default)
+// - Harness is the sole authoritative DSP QA gate as of 2026-02-13
+// - Scheduled for removal on sunset_date (30 days after authority cutover)
+//
+// See: TESTING.md for current QA infrastructure and authority policy
+// See: docs/ECHOFORM_QA_MIGRATION_COMPLETE.md for migration details
 // ============================================================================
 
 #include <JuceHeader.h>

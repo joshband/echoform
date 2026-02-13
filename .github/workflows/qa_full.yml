@@ -1,0 +1,51 @@
+name: DSP QA - Full Suite
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  harness-full:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build_qa \
+            -DENABLE_QA_HARNESS=ON \
+            -DBUILD_QA_TESTS=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build QA harness
+        run: cmake --build build_qa --target echoform_qa -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+      - name: Run comprehensive suite
+        run: |
+          cd build_qa
+          ./echoform_qa ../scenarios/echoform_comprehensive_suite.json
+
+      - name: Upload full output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-full-output-${{ matrix.os }}
+          path: qa_output/
+          retention-days: 30

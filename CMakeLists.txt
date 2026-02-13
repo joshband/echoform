@@ -62,7 +62,7 @@ target_compile_definitions(StereoMemoryDelay PRIVATE
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-option(ENABLE_TESTS "Build tests" ON)
+option(ENABLE_TESTS "Build legacy tests (DEPRECATED, sunset 2026-03-15)" OFF)
 if(ENABLE_TESTS)
     enable_testing()
     juce_add_console_app(MemoryDelayEngineTests

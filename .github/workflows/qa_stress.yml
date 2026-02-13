@@ -1,0 +1,46 @@
+name: DSP QA - Stress Suite
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  harness-stress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build_qa \
+            -DENABLE_QA_HARNESS=ON \
+            -DBUILD_QA_TESTS=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build QA harness
+        run: cmake --build build_qa --target echoform_qa -j$(nproc)
+
+      - name: Run stress suite
+        run: |
+          cd build_qa
+          ./echoform_qa ../scenarios/echoform_stress_suite.json
+        continue-on-error: true
+
+      - name: Upload stress output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-stress-output
+          path: qa_output/stress_tests/
+          retention-days: 14
