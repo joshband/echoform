@@ -1,2 +1,0 @@
-/usr/bin/ar qc libqa_runners.a CMakeFiles/qa_runners.dir/runners/in_process_runner.cpp.o CMakeFiles/qa_runners.dir/runners/standalone_binary_runner.cpp.o CMakeFiles/qa_runners.dir/runners/process_binary_executor.cpp.o CMakeFiles/qa_runners.dir/runners/performance_profiler.cpp.o
-/usr/bin/ranlib libqa_runners.a
