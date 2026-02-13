@@ -1,0 +1,3 @@
+[submodule "external/qa_harness"]
+	path = external/qa_harness
+	url = https://github.com/joshband/audio-dsp-qa-harness.git
