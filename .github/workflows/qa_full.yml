@@ -33,7 +33,11 @@ jobs:
             libxinerama-dev \
             libxcursor-dev \
             libfreetype6-dev \
-            libfontconfig1-dev
+            libfontconfig1-dev \
+            liblapack-dev \
+            liblapacke-dev \
+            libopenblas-dev \
+            libfftw3-dev
 
       - name: Configure CMake
         run: |
