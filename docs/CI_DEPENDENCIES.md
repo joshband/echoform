@@ -14,6 +14,7 @@ sudo apt-get update && sudo apt-get install -y \
   libxcursor-dev \
   libfreetype6-dev \
   libfontconfig1-dev \
+  libcurl4-openssl-dev \
   liblapack-dev \
   liblapacke-dev \
   libopenblas-dev \
@@ -36,6 +37,7 @@ xcode-select --install
 | `libasound2-dev` | ALSA audio | JUCE |
 | `libx11-dev`, `libxext-dev`, `libxrandr-dev`, `libxinerama-dev`, `libxcursor-dev` | X11 windowing | JUCE (juceaide) |
 | `libfreetype6-dev`, `libfontconfig1-dev` | Font rendering | JUCE |
+| `libcurl4-openssl-dev` | HTTP/HTTPS networking | JUCE |
 | `liblapack-dev`, `liblapacke-dev` | Linear algebra | SAF (room simulation) |
 | `libopenblas-dev` | BLAS implementation | SAF |
 | `libfftw3-dev` | FFT library | SAF |
