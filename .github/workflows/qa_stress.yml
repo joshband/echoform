@@ -35,7 +35,8 @@ jobs:
             -DENABLE_QA_HARNESS=ON \
             -DBUILD_QA_TESTS=ON \
             -DENABLE_TESTS=OFF \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build QA harness
         run: cmake --build build_qa --target echoform_qa -j$(nproc)

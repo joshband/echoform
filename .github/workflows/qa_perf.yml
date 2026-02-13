@@ -36,7 +36,8 @@ jobs:
             -DBUILD_QA_TESTS=ON \
             -DENABLE_TESTS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-O3 -march=native"
+            -DCMAKE_CXX_FLAGS="-O3 -march=native" \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build QA harness
         run: cmake --build build_qa --target echoform_qa -j$(nproc)
