@@ -54,7 +54,7 @@ jobs:
       - name: Run comprehensive suite
         run: |
           cd build_qa
-          ./echoform_qa ../scenarios/echoform_comprehensive_suite.json
+          ./echoform_qa_artefacts/Release/echoform_qa ../scenarios/echoform_comprehensive_suite.json
 
       - name: Upload full output
         if: always()

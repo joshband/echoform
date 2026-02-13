@@ -53,7 +53,7 @@ jobs:
       - name: Run critical suite
         run: |
           cd build_qa
-          ./echoform_qa ../scenarios/echoform_critical_suite.json
+          ./echoform_qa_artefacts/Release/echoform_qa ../scenarios/echoform_critical_suite.json
 
       - name: Upload artifacts on failure
         if: failure()

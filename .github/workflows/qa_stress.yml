@@ -48,7 +48,7 @@ jobs:
       - name: Run stress suite
         run: |
           cd build_qa
-          ./echoform_qa ../scenarios/echoform_stress_suite.json
+          ./echoform_qa_artefacts/Release/echoform_qa ../scenarios/echoform_stress_suite.json
         continue-on-error: true
 
       - name: Upload stress output
