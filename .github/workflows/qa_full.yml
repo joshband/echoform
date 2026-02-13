@@ -34,6 +34,7 @@ jobs:
             libxcursor-dev \
             libfreetype6-dev \
             libfontconfig1-dev \
+            libcurl4-openssl-dev \
             liblapack-dev \
             liblapacke-dev \
             libopenblas-dev \
