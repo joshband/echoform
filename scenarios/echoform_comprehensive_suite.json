@@ -2,9 +2,12 @@
   "suite_version": "1.0",
   "id": "echoform_comprehensive_suite",
   "name": "Echoform Comprehensive Test Suite",
-  "description": "Complete test coverage for Echoform MemoryDelayEngine - covers all feedback modes, stereo modes, modulation, routing, spatial acoustics, edge cases, and stress tests. 39 scenarios with 98% feature coverage.",
+  "description": "Complete test coverage for Echoform MemoryDelayEngine - covers core contract checks, feedback modes, stereo modes, modulation, routing, spatial acoustics, edge cases, and stress tests.",
   "scenario_ids": [
     "echoform_smoke_test",
+    "echoform_latency_processing_contract",
+    "echoform_parameter_smoothing_contract",
+    "echoform_state_integrity_contract",
     "echoform_buffer_wraparound",
     "echoform_determinism",
     "echoform_collect_overdub",

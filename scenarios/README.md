@@ -2,6 +2,21 @@
 
 Comprehensive test coverage for Echoform MemoryDelayEngine using the audio-dsp-qa-harness framework.
 
+## Contract Pack Addendum (2026-02-16)
+
+- Added reusable contract scenarios under `scenarios/echoform/contracts/`:
+  - `echoform_latency_processing_contract.json`
+  - `echoform_parameter_smoothing_contract.json`
+  - `echoform_state_integrity_contract.json`
+- Added contracts to both `echoform_critical_suite.json` and `echoform_comprehensive_suite.json`.
+- Current suite totals after this addition:
+  - Critical suite: 8 scenarios
+  - Comprehensive suite: 42 scenarios
+- Latest local validation:
+  - Critical: 7 PASS, 1 WARN, 0 FAIL, 0 ERROR
+  - Comprehensive: 41 PASS, 1 WARN, 0 FAIL, 0 ERROR
+- Note: state integrity is currently a proxy contract until the embedded harness snapshot in `external/qa_harness` is updated to include native state roundtrip APIs.
+
 ## 📁 Directory Structure
 
 ```

@@ -61,9 +61,10 @@ The UI reads tokens from `resources/visualdna_tokens.json`. If the file is missi
 
 Echoform includes comprehensive QA scenarios using the audio-dsp-qa-harness:
 
-- **38 scenarios** covering feedback modes, stereo modes, modulation, routing, spatial acoustics, and stress tests
-- **100% pass rate** (31 passing, 7 warnings, 0 failures)
+- **42 scenarios** covering feedback modes, stereo modes, modulation, routing, spatial acoustics, stress tests, and contract checks
+- **Latest local run**: 41 passing, 1 warning, 0 failures
 - **Native stimulus types** including room simulation for spatial testing
+- **Contract pack adoption**: latency, parameter smoothing, and state integrity contracts are included in critical/comprehensive suites
 
 ### Test Categories
 
@@ -79,15 +80,20 @@ Echoform includes comprehensive QA scenarios using the audio-dsp-qa-harness:
 ### Running Tests
 
 ```bash
-# Run comprehensive suite (all 38 scenarios)
-./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_comprehensive_suite.json
+# Run critical suite (8 scenarios)
+./build_qa/echoform_qa_artefacts/Release/echoform_qa scenarios/echoform_critical_suite.json
+
+# Run comprehensive suite (42 scenarios)
+./build_qa/echoform_qa_artefacts/Release/echoform_qa scenarios/echoform_comprehensive_suite.json
 
 # Run individual scenario
-./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform/smoke_test.json
+./build_qa/echoform_qa_artefacts/Release/echoform_qa scenarios/echoform/smoke_test.json
 
 # Run with performance profiling
-./build/echoform_qa_artefacts/Debug/echoform_qa scenarios/echoform_performance_suite.json --enable-profiling
+./build_qa/echoform_qa_artefacts/Release/echoform_qa scenarios/echoform_performance_suite.json --enable-profiling
 ```
+
+State integrity currently uses a proxy contract because the embedded harness snapshot in this repo does not yet expose the newer native state roundtrip APIs. This scenario should be migrated to true `state_roundtrip` once the harness snapshot is updated.
 
 See `docs/SPATIAL_SCENARIOS_RETROACTIVE_IMPROVEMENTS.md` for details on the 3 new spatial scenarios that test echoform with room acoustics.
 

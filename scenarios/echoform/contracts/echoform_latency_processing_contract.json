@@ -1,0 +1,92 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_latency_processing_contract",
+  "name": "Echoform Latency Processing Contract",
+  "category": "contract",
+  "description": "Contract baseline for low-latency processing behavior in passthrough-oriented conditions.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL"],
+    "excluded_behaviors": [],
+    "notes": "Uses impulse stimulus and near-immediate window checks to catch algorithmic latency regressions."
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "single",
+    "parameters": {
+      "amplitude": 0.8,
+      "offset_samples": 96
+    }
+  },
+
+  "parameter_variations": {
+    "Mix": 0.0,
+    "Feedback": 0.0
+  },
+
+  "analysis_windows": {
+    "near_immediate": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 0.02,
+      "description": "Immediate-response region (first 20ms)"
+    },
+    "full": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 1.0,
+      "description": "Full render window"
+    }
+  },
+
+  "expected_invariants": {
+    "contract_finite": {
+      "metric": "non_finite",
+      "window": "full",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "Output must remain finite"
+    },
+    "contract_immediate_energy": {
+      "metric": "rms_energy",
+      "window": "near_immediate",
+      "threshold": {
+        "min": 0.0005
+      },
+      "severity": "hard_fail",
+      "description": "Impulse energy should appear in near-immediate window"
+    },
+    "contract_peak_budget": {
+      "metric": "peak_level",
+      "window": "full",
+      "threshold": {
+        "max": 1.0
+      },
+      "severity": "hard_fail",
+      "description": "No clipping in contract baseline"
+    },
+    "contract_continuity": {
+      "metric": "discontinuity_count",
+      "window": "full",
+      "threshold": {
+        "max_count": 200,
+        "detection_threshold_db": -30.0
+      },
+      "severity": "soft_warn",
+      "description": "Latency path should avoid excessive discontinuities"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "echoform_latency_processing_contract",
+      "capability_class": "latency_contract"
+    }
+  }
+}
