@@ -4,6 +4,9 @@
   "description": "Essential tests that must pass before release - covers core functionality, stability, and determinism. Run this for quick validation (~30 seconds).",
   "scenario_ids": [
     "echoform_smoke_test",
+    "echoform_latency_processing_contract",
+    "echoform_parameter_smoothing_contract",
+    "echoform_state_integrity_contract",
     "echoform_determinism",
     "echoform_feed_mode_stability",
     "echoform_buffer_wraparound",

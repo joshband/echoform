@@ -1,0 +1,87 @@
+{
+  "scenario_version": "1.0",
+  "id": "echoform_state_integrity_contract",
+  "name": "Echoform State Integrity Contract",
+  "category": "contract",
+  "description": "State-focused contract baseline for stateful behavior continuity. Serves as a contract placeholder until native saveState/loadState roundtrip is wired in the adapter.",
+
+  "capability_requirements": {
+    "required_effect_types": ["DELAY"],
+    "required_behaviors": ["STATEFUL", "FEEDBACK"],
+    "excluded_behaviors": [],
+    "notes": "Proxy state contract: validates continuity/stability of stateful feedback behavior without native checkpoint roundtrip."
+  },
+
+  "stimulus": {
+    "stimulus_id": "impulse",
+    "stimulus_variant": "periodic",
+    "parameters": {
+      "amplitude": 0.3,
+      "period_seconds": 0.2,
+      "num_pulses": 12
+    }
+  },
+
+  "parameter_variations": {
+    "Feedback": 0.7,
+    "Mix": 0.65
+  },
+
+  "analysis_windows": {
+    "state_window": {
+      "type": "time_range",
+      "start_seconds": 0.0,
+      "end_seconds": 3.0,
+      "description": "Stateful accumulation window"
+    }
+  },
+
+  "expected_invariants": {
+    "contract_finite": {
+      "metric": "non_finite",
+      "window": "state_window",
+      "threshold": {
+        "max": 0
+      },
+      "severity": "hard_fail",
+      "description": "Stateful processing must remain finite"
+    },
+    "contract_state_energy": {
+      "metric": "rms_energy",
+      "window": "state_window",
+      "threshold": {
+        "min": 0.001
+      },
+      "severity": "hard_fail",
+      "description": "Stateful buffer should retain audible energy"
+    },
+    "contract_state_growth": {
+      "metric": "energy_growth",
+      "window": "state_window",
+      "threshold": {
+        "allow_increase_pct": 400.0
+      },
+      "severity": "soft_warn",
+      "description": "Accumulation should stay bounded"
+    },
+    "contract_state_continuity": {
+      "metric": "discontinuity_count",
+      "window": "state_window",
+      "threshold": {
+        "max_count": 5000,
+        "detection_threshold_db": -35.0
+      },
+      "severity": "soft_warn",
+      "description": "State evolution should avoid severe discontinuity bursts"
+    }
+  },
+
+  "baseline_tracking": {
+    "enabled": true,
+    "compare_against": ["golden"],
+    "provenance": {
+      "scenario_id": "echoform_state_integrity_contract",
+      "capability_class": "state_contract_proxy"
+    }
+  }
+}
