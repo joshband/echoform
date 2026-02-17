@@ -32,6 +32,90 @@ qa::scenario::QARunnerFactory makeInProcessRunnerFactory()
     };
 }
 
+std::string suiteStatusLabel(const qa::scenario::TestSuiteResult& result)
+{
+    if (result.errorCount > 0)
+        return "ERROR";
+    if (result.failCount > 0)
+        return "FAIL";
+    if (result.warnCount > 0)
+        return "WARN";
+    if (result.totalScenarios > 0 && result.skipCount == result.totalScenarios)
+        return "SKIP";
+    return "PASS";
+}
+
+struct TopFinding
+{
+    std::string severity;
+    std::string scenarioId;
+    std::string message;
+};
+
+bool findTopFinding(const qa::scenario::TestSuiteResult& result, TopFinding& finding)
+{
+    for (const auto& scenario : result.scenarioResults)
+    {
+        if (scenario.status == qa::scenario::ScenarioResult::Status::ERROR)
+        {
+            finding.severity = "ERROR";
+            finding.scenarioId = scenario.scenarioId;
+            finding.message = scenario.errorMessage.empty() ? "scenario execution error" : scenario.errorMessage;
+            return true;
+        }
+    }
+
+    for (const auto& scenario : result.scenarioResults)
+    {
+        if (scenario.status == qa::scenario::ScenarioResult::Status::FAIL)
+        {
+            finding.severity = "FAIL";
+            finding.scenarioId = scenario.scenarioId;
+            if (!scenario.hardFailures.empty())
+                finding.message = scenario.hardFailures.front();
+            else
+                finding.message = "hard invariant failure";
+            return true;
+        }
+    }
+
+    for (const auto& scenario : result.scenarioResults)
+    {
+        if (scenario.status == qa::scenario::ScenarioResult::Status::WARN)
+        {
+            finding.severity = "WARN";
+            finding.scenarioId = scenario.scenarioId;
+            if (!scenario.softWarnings.empty())
+                finding.message = scenario.softWarnings.front();
+            else
+                finding.message = "soft warning present";
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void printSuiteSummaryBlock(const qa::scenario::TestSuiteResult& result,
+                           const std::filesystem::path& reportPath)
+{
+    std::cout << "Suite: " << result.suiteId << "  Status: " << suiteStatusLabel(result) << "\n";
+    std::cout << "Total: " << result.totalScenarios
+              << "  Pass: " << result.passCount
+              << "  Warn: " << result.warnCount
+              << "  Fail: " << result.failCount
+              << "  Error: " << result.errorCount
+              << "  Skip: " << result.skipCount << "\n";
+
+    TopFinding finding;
+    if (findTopFinding(result, finding))
+        std::cout << "Top finding: " << finding.scenarioId << " (" << finding.severity << ") " << finding.message << "\n";
+    else
+        std::cout << "Top finding: none\n";
+
+    std::cout << "Report: " << reportPath << "\n";
+}
+
 int runScenario(const std::string& scenarioPath, bool captureBaseline, bool compareBaseline, bool enableProfiling)
 {
     std::cout << "Running scenario: " << scenarioPath << "\n";
@@ -177,13 +261,7 @@ int runTestSuite(const std::string& suitePath, bool captureBaseline, bool compar
     );
 
     // Report results
-    std::cout << "\n=== Test Suite Results ===\n";
-    std::cout << "Total: " << result.totalScenarios << "\n";
-    std::cout << "Passed: " << result.passCount << "\n";
-    std::cout << "Warned: " << result.warnCount << "\n";
-    std::cout << "Failed: " << result.failCount << "\n";
-    std::cout << "Skipped: " << result.skipCount << "\n";
-    std::cout << "Errors: " << result.errorCount << "\n";
+    printSuiteSummaryBlock(result, config.outputDir / "report" / "summary.md");
 
     if (result.stoppedEarly)
         std::cout << "\n(Stopped early due to failure)\n";
@@ -264,13 +342,7 @@ int runDiscoverSuite(const std::string& rootDir, bool captureBaseline, bool comp
     qa::scenario::TestSuiteResult result =
         suiteExecutor.execute(suite, allScenarios, &config);
 
-    std::cout << "\n=== Auto-Discovered Suite Results ===\n";
-    std::cout << "Total: " << result.totalScenarios << "\n";
-    std::cout << "Passed: " << result.passCount << "\n";
-    std::cout << "Warned: " << result.warnCount << "\n";
-    std::cout << "Failed: " << result.failCount << "\n";
-    std::cout << "Skipped: " << result.skipCount << "\n";
-    std::cout << "Errors: " << result.errorCount << "\n";
+    printSuiteSummaryBlock(result, config.outputDir / "report" / "summary.md");
 
     return result.passed ? 0 : 1;
 }
