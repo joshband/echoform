@@ -59,23 +59,13 @@ jobs:
         if: always()
         run: |
           SUMMARY_PATH=""
-          SUITE_JSON_PATH=""
           if [ -f build_qa/qa_output/report/ci_summary.md ]; then
             SUMMARY_PATH="build_qa/qa_output/report/ci_summary.md"
           elif [ -f qa_output/report/ci_summary.md ]; then
             SUMMARY_PATH="qa_output/report/ci_summary.md"
-          elif [ -f build_qa/qa_output/suite_result.json ]; then
-            SUITE_JSON_PATH="build_qa/qa_output/suite_result.json"
-          elif [ -f qa_output/suite_result.json ]; then
-            SUITE_JSON_PATH="qa_output/suite_result.json"
           else
-            echo "No QA CI summary or suite_result.json found"
+            echo "No report/ci_summary.md found in QA outputs"
             exit 0
-          fi
-
-          if [ -z "$SUMMARY_PATH" ] && [ -n "$SUITE_JSON_PATH" ]; then
-            python3 -c 'import json,sys; d=json.load(open(sys.argv[1], "r", encoding="utf-8")); s=d.get("summary", {}); a=d.get("scenarios", []); suite=d.get("suite_id", "qa_suite"); status=d.get("status", "UNKNOWN"); total=s.get("total", len(a)); passed=s.get("passed", 0); warned=s.get("warned", 0); failed=s.get("failed", 0); errors=s.get("errors", 0); skipped=s.get("skipped", 0); print("## QA Suite Job Summary\n"); print("| Suite | Status | Total | Pass | Warn | Fail | Error | Skip |"); print("|---|---:|---:|---:|---:|---:|---:|---:|"); print(f"| `{suite}` | `{status}` | {total} | {passed} | {warned} | {failed} | {errors} | {skipped} |")' "$SUITE_JSON_PATH" > /tmp/qa_ci_summary.md
-            SUMMARY_PATH="/tmp/qa_ci_summary.md"
           fi
 
           if [ -x external/qa_harness/scripts/publish_ci_summary.sh ]; then
