@@ -1,6 +1,9 @@
 # Build output
 build/
 build_qa/
+build_test/
+build_contracts/
+.cache/
 qa_output/
 *.vst3/
 *.so
