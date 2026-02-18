@@ -6,6 +6,10 @@
 
 #define ECHOFORM_USE_VDNA_UI 0
 
+#if ECHOFORM_USE_VDNA_UI
+class FeedbackComponent;
+#endif
+
 class StereoMemoryDelayAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
@@ -20,11 +24,18 @@ private:
 
     juce::Slider mixSlider;
     juce::Slider timeSlider;
+    juce::Label feedbackLabel;
     juce::Label mixLabel;
     juce::Label timeLabel;
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> timeAttachment;
+#if ECHOFORM_USE_VDNA_UI
+    std::unique_ptr<FeedbackComponent> feedbackComponent;
+#else
+    juce::Slider feedbackSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAttachment;
+#endif
 
     TokenLookAndFeel lookAndFeel;
 

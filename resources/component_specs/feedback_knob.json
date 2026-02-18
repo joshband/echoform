@@ -1,0 +1,28 @@
+{
+  "id": "feedback_knob.standard",
+  "category": "continuous_control",
+  "hierarchy": ["control", "continuous", "rotary"],
+  "assets": {
+    "base": "knob_base.png",
+    "body": "knob_body.png",
+    "indicator": "knob_indicator.png"
+  },
+  "layers": [
+    { "id": "base", "role": "surface.base", "transform": "none" },
+    { "id": "body", "role": "control.body", "transform": "rotate" },
+    { "id": "indicator", "role": "control.indicator", "transform": "rotate" }
+  ],
+  "interaction": {
+    "inputType": "dragVertical",
+    "valueRange": "0-1",
+    "gestureCurve": "linear"
+  },
+  "motion": {
+    "rotationMin": "-135",
+    "rotationMax": "135"
+  },
+  "tokens": {
+    "control.body.color": "color.control.active",
+    "control.indicator.color": "color.indicator.on"
+  }
+}
